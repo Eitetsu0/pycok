@@ -22,12 +22,13 @@ TASKLIST=[
         'enable':True,
         'fastrun':True,  #run this task as soon as manager started
     },
-    
+
 ]
+
 @contextmanager
 def TasksFile(file='./config.json'):
     """
-    usage: 
+    usage:
         with TasksFile() as tasklist:
             mycode...
     """
@@ -36,7 +37,7 @@ def TasksFile(file='./config.json'):
         with open(file,'r+') as f:
             config=json.load(f)
 
-    assert isinstance(config,dict), 'config isn\'t a dict'    
+    assert isinstance(config,dict), 'config isn\'t a dict'
 
     tasklist=config.get('tasklist',TASKLIST)
     yield tasklist
@@ -46,7 +47,7 @@ def TasksFile(file='./config.json'):
 
 
 def addtask(**ntask):
-    with TasksFile() as tasklist: 
+    with TasksFile() as tasklist:
         tasklist.append(ntask)
 
 
@@ -65,16 +66,24 @@ def runATask(s):
     else:
         return getattr(coktask,s[0])()
 
-#chack tasklist
+#check tasklist : set fastruns ,
 with TasksFile() as tasklist:
     for task in tasklist:
         if not task['enable']:
             continue
         if task['fastrun']:
             task['time']=int(time.time())
-        if task['until']>0 and task['until']<time.time():
-            task['enable']=False
-        
+        #if task['until']>0 and task['until']<time.time():
+        #    task['enable']=False
+
+def ifTaskEnable(task):
+    if task['enable']:
+        if 'time' not in task:
+            return False
+        if 'until' in task and task['until']>0 and task['time']>task['until']:
+            return False
+        return True
+    return False
 
 #run task loop
 informIdle=True
@@ -96,7 +105,7 @@ while True:
                     task['time']=int(time.time())+task['every']
                 else:
                     task['enable']=False
-                
+
                 startTime=time.time()
                 print('Running task \'',task['name'],'\'in',time.strftime(TIMEFORMAT,time.localtime()))
                 if task['prepare']!=None:
@@ -111,20 +120,21 @@ while True:
                 print('Task \'%s\' ended in'%task['name'],time.strftime('%X',time.gmtime(time.time()-startTime)))
                 print('\n')
 
+            task['enable']=ifTaskEnable(task)
             if task["enable"]:
                 if soon==None:
-                    soon=index
-                elif task.get('time',tasklist[soon]['time'])<tasklist[soon]['time']:
-                    soon=index
+                    soon=task
+                elif task.get('time',soon['time'])<soon['time']:
+                    soon=task
             index+=1
-    
+
     if informIdle:
         informIdle=False
         timeIdleStart=int(time.time())
         print('idle ...')
         if soon!=None:
-            nextTime=time.strftime(TIMEFORMAT,time.localtime(tasklist[soon]['time']))
-            print('the very soon task is \'%s\' at'%tasklist[soon]['name'], nextTime)
+            nextTime=time.strftime(TIMEFORMAT,time.localtime(soon['time']))
+            print('the very soon task is \'%s\' at'%soon['name'], nextTime)
             print('\n')
         else:
             print('none task is waiting..')
