@@ -5,21 +5,29 @@ import os
 import math
 
 class adb(object):
-    def __init__(self,adbpath='default',device='',cache='/tmp/pycok.cache'):
+    def __init__(self,adbpath='default',device=None,cache='/tmp/pycok.cache'):
         if adbpath=='default':
             self.adbpath=subprocess.run(['which','adb'],stdout=subprocess.PIPE).stdout
         else:
             self.adbpath=adbpath
 
         #TODO:device
-
+        self.device=None
+        if device:
+            self.device=device
+        else:
+            self.device=self.listdevice()[0][0]
         if not os.path.isdir(cache):
             os.makedirs(cache)
         self.cache=cache
 
     def __call__(self,*cmd, timeout=None,byt=False):
         #TODO: check cmd
-        p=subprocess.run([self.adbpath,]+list(cmd),stdout=subprocess.PIPE)
+        precmd=[self.adbpath,]
+        if self.device and cmd[0]!='devices':
+            precmd.append(b'-s')
+            precmd.append(self.device)
+        p=subprocess.run(precmd+list(cmd),stdout=subprocess.PIPE)
         p.check_returncode()
         if byt:
             return p.stdout
@@ -49,8 +57,34 @@ class adb(object):
             raise FileNotFoundError('no adb found')
         self.__adbpath=path
 
+    @property
+    def device(self):
+        return self.__device
+    @device.setter
+    def device(self,val):
+        if val:
+            self.__device=val
+            self.timeout=3
+        else:
+            self.__device=None
+            self.timeout=False
+
+    def listdevice(self):
+        devices=[]
+        s=self.adb('devices','-l').splitlines()
+        s.remove('')
+        for line in s[1:]:
+            fields=line.split()
+            line=fields[:2]
+            line.append({})
+            for field in fields[2:]:
+                key,val=field.split(':',1)
+                line[2][key]=val
+            devices.append(line)
+        return devices
+
     def get_scrcap(self,name=None,path=None):
-        self.adb('shell','screencap','-p','/tmp/scrcap.png')
+        self.adb('shell','screencap','-p','/sdcard/scrcap.png')
 
         if path!=None and isinstance(path,(str,bytes)):
             savefile=path
@@ -61,11 +95,11 @@ class adb(object):
             savefile=os.path.join(savefile,name)
         else:
             savefile=os.path.join(savefile,'scrcap.png')
-        self.adb('pull','/tmp/scrcap.png',savefile.encode('utf-8'))
+        self.adb('pull','/sdcard/scrcap.png',savefile.encode('utf-8'))
         return savefile
 
     def __getattr__(self,attr):
-        raise AttributeError("'adb'object has on attribute '%s'" % attr)
+        raise AttributeError("'adb'object has no attribute '%s'" % attr)
 
     def input(self,*cmd,sources=None):
         """
@@ -112,9 +146,4 @@ if __name__=='__main__':
     import time
     a=adb()
     a.get_scrcap(time.strftime('%Y_%m_%d %X',time.localtime())+'.png','.')
-    ###print('\n\n''a.dir :\n       ',a.__dir__(),'\n')
-
-    #a.get_scrcap('sc1.png')
-    #print("Run: a.input('swipe','150','650','550','650') :")
-    #print('    ',a.input('swipe','150','650','550','650'))
-    #a.get_scrcap('sc2.png')
+    a.listdevice()
