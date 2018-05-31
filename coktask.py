@@ -1,15 +1,17 @@
 #! /usr/bin/python3
 # -*- coding:utf-8 -*-
 
-import pycok
 import time
-from contextlib import contextmanager
 import json,os,math
+import schedule
 
-cok=pycok.pycok()
+cok=schedule.cok
+
 cok.speed=80
 cok.lineSize=6
 AUTOEXIT=10
+
+TIMEFORMAT="%Y-%m-%d %a %H:%M:%S" #"%a %b %d %H:%M:%S %Y"
 
 #tasks
 def quickgather():
@@ -37,6 +39,12 @@ def monsterkill(times=10,lines=5):
             for _ in range(20):
                 cok.wait(5)
                 print('.',end='',flush=True)
-            print(' continue.') 
+            print(' continue.')
 
 
+
+if __name__=='__main__':
+    schedule.init()
+    while True:
+        schedule.schedule()
+        time.sleep(10)

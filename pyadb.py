@@ -10,7 +10,7 @@ class adb(object):
             self.adbpath=subprocess.run(['which','adb'],stdout=subprocess.PIPE).stdout
         else:
             self.adbpath=adbpath
-        
+
         #TODO:device
 
         if not os.path.isdir(cache):
@@ -24,7 +24,7 @@ class adb(object):
         if byt:
             return p.stdout
         return p.stdout.decode()
-    
+
     def adb(self, *cmd, timeout=None):
         return self.__call__(*cmd,timeout=timeout)
 
@@ -51,7 +51,7 @@ class adb(object):
 
     def get_scrcap(self,name=None,path=None):
         self.adb('shell','screencap','-p','/tmp/scrcap.png')
-        
+
         if path!=None and isinstance(path,(str,bytes)):
             savefile=path
         else:
@@ -93,7 +93,7 @@ class adb(object):
             ashellcmd.append(str(xy2[0]))
             ashellcmd.append(str(xy2[1]))
         elif angle!=None:
-            
+
             rad=angle*math.pi/180
             x=math.cos(rad)
             y=math.sin(rad)
