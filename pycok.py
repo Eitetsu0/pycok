@@ -512,7 +512,10 @@ class Task(dict):
                     self.start += self.every
 
             self.countdown=self.nloop
-            self.time = self.start
+            if self.start>time.time():
+                self.time = self.start
+            else:
+                self.time = time.time()
 
     def run(self, sub=None):  # TODO
         if sub:
@@ -648,41 +651,27 @@ def schedule(device=None, package=None):
             soon = None
             for task in tasklist:
                 assert(type(task) == Task)
-                if task.every > 0:
-                    task.updateEvery()
                 if task.isActive() and task.time <= time.time():
                     startTime = time.time()
                     print('Running task \'%s\'in' % task['name'], time.strftime(
                         TIMEFORMAT, time.localtime()))
-                    task.run()
-                    # run current task
-                    # if task['nloop'] > 0:
-                    #     task['nloop'] -= 1
-                    # task['time'] += task['interval']
 
-                    # if task['prepare'] is not None:
-                    #     print('    preparing ...')
-                    #     __runSub(task['prepare'])
-                    # if task['run']:
-                    #     print('    task \'', task['name'], '\'start at', time.strftime(
-                    #         TIMEFORMAT, time.localtime()))
-                    #     __runSub(task['run'])
-                    # if task['after']:
-                    #     print('    running \'after\' ...')
-                    #     __runSub(task['after'])
+                    task.run()
+
                     print('Task \'%s\' ended in' % task['name'], time.strftime(
                         '%Hhr%Mm%Ss', time.gmtime(time.time()-startTime)))
                     print('\n')
                     informIdle = True
 
-                if task["enable"]:
+                if task.every > 0:
+                    task.updateEvery()
+
+                if task.enable:
                     if soon is None:
                         soon = task
-                    elif task.isActive():
+                    elif task.isActive() or task.start > time.time():
                         if task.get('time', soon['time']) < soon['time']:
                             soon = task
-                    elif task.start > time.time():
-                        soon = task
 
             if informIdle:
                 informIdle = False
