@@ -1,7 +1,8 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 # -*- coding:utf-8 -*-
 
 import math
+import time
 
 from pycok import cok, subtask, schedule
 import pycok
@@ -33,13 +34,13 @@ def vipsearch(rsskind=None, lvl=None, unique=None):
 
 
 @subtask
-def quickgather(lines=3,stype='iron'):
+def quickgather(lines=3,stype='iron',lv=6,preset=None):
     # print('Garthering start...')
-    cok.vipsearch(stype, 6)
+    cok.vipsearch(stype, lv)
     n = lines
     while n > 0:
         n -= 1
-        cok.gather(preset='speed')
+        cok.gather(preset=preset)
         print('    gathering line left', n, ' .')
         cok.wait(2)
 
@@ -76,19 +77,21 @@ if __name__ == '__main__':
 
     args = pycok.parser.parse_args()  # TODO
 
-    cok.wait(1200)
+    if args.sleep:
+        time.sleep(args.sleep)
 
-    d = cok.adb0.listdevice()
-    if len(d) == 0:
-        print('no devices connected')
-        exit(1)
-    elif len(d) > 1:
-        print('multiple connected devices:')
-        i = 0
-        while i < len(d):
-            print('    [%d] %s' % (i, d))
-            i += 1
-        s = int(input('select number device:'))
+    if args.device is None:
+        d = cok.adb0.listdevice()
+        if len(d) == 0:
+            print('no devices connected')
+            exit(1)
+        elif len(d) > 1:
+            print('multiple connected devices:')
+            i = 0
+            while i < len(d):
+                print('    [%d] %s' % (i, d))
+                i += 1
+            s = int(input('select number device:'))
 
     pycok.init()
     schedule()

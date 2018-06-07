@@ -32,7 +32,7 @@ class adb(object):
         self.cache = cache
 
     def __call__(self, *cmd, timeout=None, byt=False):
-        # TODO: check cmd
+        # TODO: check cmd, timeout
         precmd = [self.adbpath, ]
         if cmd[0] != 'devices' and self.device:
             precmd.append(b'-s')
@@ -44,6 +44,8 @@ class adb(object):
             try:
                 subprocess.run(precmd + 'shell', 'input', 'keyevent',
                                'KEYCODE_WAKEUP', stdout=subprocess.PIPE, timeout=5)
+                self.wakeup()
+                self.unlock()
             except subprocess.TimeoutExpired:
                 raise Exception(
                     'timeout without reply from device. is it awaken?')
@@ -185,6 +187,17 @@ class adb(object):
         s = self.adb(*cmd)
         package = [p.strip() for p in s[8:].split('package:')]
         return package
+
+    def sleep(self):
+        if self.input('keyevent', 'KEYCODE_SLEEP') != '':
+            return False
+        return True
+
+    def wakeup(self):
+        self.input('keyevent', 'KEYCODE_WAKEUP')
+
+    def unlock(self):
+        self.input('swipe', '360', '1070', '360', '400')
 
 
 if __name__ == '__main__':
