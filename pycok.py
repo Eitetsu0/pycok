@@ -30,7 +30,7 @@ class pycok(object):
             # set vip
             self.vip = vip
 
-            if self.get_status()=='sleeping':
+            if self.get_status() == 'sleeping':
                 self.adb0.wakeup()
                 self.wait()
                 self.adb0.unlock()
@@ -73,8 +73,8 @@ class pycok(object):
         self._waittingtime = 100/val
 
     def get_status(self):
-        s=self.adb0.adb('shell', 'dumpsys', 'window', 'policy')
-        if s.find('mShowingLockscreen=false')<0 or s.find('isStatusBarKeyguard=false')<0:
+        s = self.adb0.adb('shell', 'dumpsys', 'window', 'policy')
+        if s.find('mShowingLockscreen=false') < 0 or s.find('isStatusBarKeyguard=false') < 0:
             return 'sleeping'
         # TODO:cv
         self.adb0.adb('shell', 'am', 'kill-all')  # kill background processes
@@ -407,6 +407,7 @@ _TASKLIST_default = [
         'every': 0,
         'enable': False,
         'fastrun': True,  # run this task as soon as manager started
+        # 如果fastrun==True，start和until都代表相对时间，否则为绝对时间
     },
 
 ]
@@ -434,7 +435,7 @@ class SubTask(tuple):
 
 
 class Task(dict):
-    __slots__ = tuple(_TASKLIST_default[0].keys())
+    __slots__ = tuple(_TASKLIST_default[0].keys()+['countdown'])
 
     def __init__(self, it=None, **kw):
         d = {}
@@ -446,6 +447,10 @@ class Task(dict):
             for key in kw:
                 if key in self.__slots__:
                     d[key] = kw[key]
+        if 'nloop' in d:
+            self.countdown = d['nloop']
+        else:
+            self.countdown = -1
         super().__init__(d)
 
     def __getattr__(self, key):
@@ -474,40 +479,50 @@ class Task(dict):
 
     def isActive(self):
         """
-        返回一个every>=0的任务是否处于一个 [ start, until ) 的区间内
-        并且nloop!=0
+        返回一个every>=0的任务是否处于 [ start, until ) 的区间内
+        并且 countdown!=0
         """
         if self.enable:
-            if self.every > 0:
-                assert(self.start >= 0 and self.until > self.start)
-                self.updateEvery()
+            # if self.every > 0:
+            #     assert(self.start >= 0 and self.until > self.start)
+            #     self.updateEvery()
             if self.start > time.time():
                 return False
-            if self.until > self.start and self.time > self.until:
+            if self.countdown == 0:
                 return False
-            if self.nloop == 0:
+            if self.until > self.start and self.time > self.until:
                 return False
             return True
         return False
 
     def updateEvery(self):
-        assert(self.start >= 0)
-        assert(self.until > self.start)
+        "prepare for next outer loop"
+        assert(self.every > 0)
 
-        dur = self.until-self.start
-        if self.until <= time.time():
-            while self.until < time.time():
-                self.until += self.every
-            self.start = self.until-dur
-        if self.time < self.start:
+        if not self.isActive():
+            if self.until >0:
+                dur = self.until-self.start
+                while self.until<time.time():
+                    self.until += self.every
+                self.start = self.until-dur
+            else:
+                if self.start-time.time()>1:
+                    self.start += self.every
+                while self.start + self.every < time.time():
+                    self.start += self.every
+
+            self.countdown=self.nloop
             self.time = self.start
 
     def run(self, sub=None):  # TODO
         if sub:
             return self.__runSub(self[sub])
-        if self.nloop > 0:
-            self.nloop -= 1
-        self.time += self.interval
+        if self.countdown > 0:
+            self.countdown -= 1
+        if self.fastrun:
+            self.time = time.time()+self.interval
+        else:
+            self.time += self.interval
 
         if self.prepare:
             self.run('prepare')
@@ -588,7 +603,7 @@ INTERVAL = 10
 
 
 def init(listFile=None):
-    if cok.get_status()=='sleeping':
+    if cok.get_status() == 'sleeping':
         cok.adb0.wakeup()
         cok.wait()
         cok.adb0.unlock()
@@ -603,13 +618,12 @@ def init(listFile=None):
             # if not task.enable: #ignor disabled tasks
             #     continue
             if task.fastrun:
-                task.time = int(time.time())
                 lasts = task.until - task.start
-                task.start = int(time.time())
-                if task.until>0:
+                task.start += int(time.time())
+                task.time = task.start
+                if task.until > 0:
                     task.until = task.start + lasts
-
-            if task.every > 0:
+            elif task.every > 0:
                 task.updateEvery()
                 if task.time < task.start or task.time > task.until:
                     task.time = task.start
@@ -627,7 +641,7 @@ def schedule(device=None, package=None):
 
     informIdle = True
     sleep = False
-    battery=cok.getBatteryLevel()
+    battery = cok.getBatteryLevel()
 
     with GetTasklist() as tasklist:
         while True:
@@ -640,7 +654,7 @@ def schedule(device=None, package=None):
                     startTime = time.time()
                     print('Running task \'%s\'in' % task['name'], time.strftime(
                         TIMEFORMAT, time.localtime()))
-                    task.runTask()
+                    task.run()
                     # run current task
                     # if task['nloop'] > 0:
                     #     task['nloop'] -= 1
@@ -698,21 +712,21 @@ def schedule(device=None, package=None):
             time.sleep(INTERVAL)
 
             if not sleep:
-                if cok.get_status()=='sleeping':
+                if cok.get_status() == 'sleeping':
                     cok.adb0.wakeup()
                     cok.wait()
                     cok.adb0.unlock()
                     cok.wait()
                     cok.launchgame()
                     cok.wait(10)
-                battery=cok.getBatteryLevel()
+                battery = cok.getBatteryLevel()
                 if battery < 20:
                     cok.adb0.sleep()
                     sleep = True
                 elif soon.time-time.time() > 600:
                     cok.adb0.sleep()
                     sleep = True
-            elif soon is not None and soon.time-time.time()<120:
+            elif soon is not None and soon.time-time.time() < 120:
                 cok.adb0.wakeup()
                 cok.wait()
                 cok.adb0.unlock()
