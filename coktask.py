@@ -34,15 +34,16 @@ def vipsearch(rsskind=None, lvl=None, unique=None):
 
 
 @subtask
-def quickgather(lines=3,stype='iron',lv=6,preset=None):
+def quickgather(lines=3,stype='iron',level=6,preset=None):
     # print('Garthering start...')
-    cok.vipsearch(stype, lv)
+    cok.vipsearch(stype, level)
+    cok.gather(preset=preset,**{stype:level})
     n = lines
-    while n > 0:
+    while n > 1:
         n -= 1
         cok.gather(preset=preset)
         print('    gathering line left', n, ' .')
-        cok.wait(2)
+        cok.wait(1)
 
 
 @subtask
@@ -50,6 +51,7 @@ def monsterkill(times=10, lines=5,wait=100):
     if lines>1:
         lines-=1
     print('Starting Monster loop')
+    cok.vipsearch('monster')
     cok.vipsearch('monster')
     n = 0
     print(' loop', times, 'times in %d' % math.ceil(times/(lines)), 'groups ..')
