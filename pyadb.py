@@ -31,7 +31,7 @@ class adb(object):
             os.makedirs(cache)
         self.cache = cache
 
-    def __call__(self, *cmd, timeout=None, byt=False):
+    def __call__(self, *cmd, timeout=5, byt=False):
         # TODO: check cmd, timeout
         precmd = [self.adbpath, ]
         if cmd[0] != 'devices' and self.device:
@@ -39,11 +39,11 @@ class adb(object):
             precmd.append(self.device)
         try:
             p = subprocess.run(
-                precmd+list(cmd), stdout=subprocess.PIPE, timeout=5)
+                precmd+list(cmd), stdout=subprocess.PIPE, timeout=timeout)
         except subprocess.TimeoutExpired:
             try:
-                subprocess.run(precmd + 'shell', 'input', 'keyevent',
-                               'KEYCODE_WAKEUP', stdout=subprocess.PIPE, timeout=5)
+                subprocess.run(precmd + ['shell', 'input', 'keyevent',
+                               'KEYCODE_WAKEUP'], stdout=subprocess.PIPE, timeout=30)
                 self.wakeup()
                 self.unlock()
             except subprocess.TimeoutExpired:

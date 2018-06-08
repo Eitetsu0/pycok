@@ -237,9 +237,9 @@ class pycok(object):
         if obj == 'occupy':
             return self.adb0.tap(self.scrX * 520/720, self.scrY * 650/1280)
 
-    def removetips(self):
-        self.tap('tips')
-        self.resetCam(worldMap=True)
+    # def removetips(self):
+    #     self.tap('tips')
+    #     self.resetCam(worldMap=True)
 
     def killmonsterin(self, x=None, y=None, preset=0, dragonWord=None):
         'similar to marchto(), by default: the center of screen'
@@ -435,7 +435,7 @@ class SubTask(tuple):
 
 
 class Task(dict):
-    __slots__ = tuple(_TASKLIST_default[0].keys()+['countdown'])
+    __slots__ = tuple(list(_TASKLIST_default[0].keys())+['countdown'])
 
     def __init__(self, it=None, **kw):
         d = {}
@@ -500,24 +500,24 @@ class Task(dict):
         assert(self.every > 0)
 
         if not self.isActive():
-            if self.until >0:
+            if self.until > 0:
                 dur = self.until-self.start
-                while self.until<time.time():
+                while self.until < time.time():
                     self.until += self.every
                 self.start = self.until-dur
             else:
-                if self.start-time.time()>1:
+                if time.time() > self.start:
                     self.start += self.every
                 while self.start + self.every < time.time():
                     self.start += self.every
 
-            self.countdown=self.nloop
-            if self.start>time.time():
+            self.countdown = self.nloop
+            if self.start > time.time():
                 self.time = self.start
             else:
                 self.time = time.time()
 
-    def run(self, sub=None):  # TODO
+    def runTask(self, sub=None):  # TODO
         if sub:
             return self.__runSub(self[sub])
         if self.countdown > 0:
@@ -528,11 +528,11 @@ class Task(dict):
             self.time += self.interval
 
         if self.prepare:
-            self.run('prepare')
+            self.runTask('prepare')
         if self.run:
-            self.run('run')
+            self.runTask('run')
         if self.after:
-            self.run('after')
+            self.runTask('after')
 
     def __runSub(self, s):
         if len(s) > 1:
@@ -656,7 +656,7 @@ def schedule(device=None, package=None):
                     print('Running task \'%s\'in' % task['name'], time.strftime(
                         TIMEFORMAT, time.localtime()))
 
-                    task.run()
+                    task.runTask()
 
                     print('Task \'%s\' ended in' % task['name'], time.strftime(
                         '%Hhr%Mm%Ss', time.gmtime(time.time()-startTime)))
