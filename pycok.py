@@ -24,6 +24,8 @@ class pycok(object):
             # raise
             # TODO:webcok
             pass
+        elif mode == 'list':
+            self.adb0 = adb(adbpath)
         elif mode == 'adb':
             self.adb0 = adb(adbpath, device)
             self.set_screen(720, 1280)  # TODO:屏幕适配
@@ -74,7 +76,7 @@ class pycok(object):
 
     def get_status(self):
         s = self.adb0.adb('shell', 'dumpsys', 'window', 'policy')
-        if s.find('mShowingLockscreen=false') < 0 or s.find('isStatusBarKeyguard=false') < 0:
+        if ('mShowingLockscreen=false'not in s) or ('isStatusBarKeyguard' in s and 'isStatusBarKeyguard=false' not in s):
             return 'sleeping'
         # TODO:cv
         self.adb0.adb('shell', 'am', 'kill-all')  # kill background processes
@@ -98,8 +100,10 @@ class pycok(object):
                     self.__gamepackage = packages[i]
                     break
                 i += 1
-
         return self.adb0.launch(self.__gamepackage)
+
+    def forceStop(self):
+        return self.adb0.adb('shell','am','force-stop',self.__gamepackage)
 
     def listGamepackage(self):
         return self.adb0.listPackage('cok')
@@ -113,15 +117,15 @@ class pycok(object):
         """
         kind:{kind1:level1,kind2:level2...}
         acceptable kind:
-            'sawmill' , 'farm' , 'iron' , 'mithril' , 'gold'
+            'sawmill' ,'wood', 'farm' ,'food', 'iron' , 'mithril' , 'gold'
         preset :
             a number in [-3,0];
             or a string in ('march','load','level','speed');
             default:None
         """
 
-        s = {'sawmill', 'farm', 'iron', 'mithril', 'gold'}
-        for key in kind:
+        s = {'sawmill','wood', 'farm','food', 'iron', 'mithril', 'gold'}
+        for key in kind.keys():
             if key not in s:
                 kind.pop(key)
         self.find(**kind)
@@ -155,7 +159,7 @@ class pycok(object):
         """
         kind:{kind1:level1,kind2:level2...}
         acceptable kind:
-            'sawmill' , 'farm' , 'iron' , 'mithril' , 'gold' , 'monster'
+            'sawmill' , 'farm' , 'iron' , 'mithril' , 'gold' , 'monster' , 'camp'
         """
         if vip is None:
             vip = self.vip
@@ -192,18 +196,20 @@ class pycok(object):
                 self.adb0.tap(self.scrX * 100/720, self.scrY * 940/1280)
         elif rsskind is not None:
             # swipe so other icons shell be in their position
-            self.adb0.swipe((self.scrX * 350/720, self.scrY * 940/1280),
+            self.adb0.swipe((self.scrX * 600/720, self.scrY * 940/1280),
                             (self.scrX * 190/720, self.scrY * 940/1280))
-            self.wait(3)
+            self.wait(4)
         if rsskind == 'sawmill' or rsskind == 'wood':
-            self.adb0.tap(self.scrX * 190/720, self.scrY * 940/1280)
+            self.adb0.tap(self.scrX * 80/720, self.scrY * 940/1280)
         elif rsskind == 'farm' or rsskind == 'food':
-            self.adb0.tap(self.scrX * 300/720, self.scrY * 940/1280)
+            self.adb0.tap(self.scrX * 190/720, self.scrY * 940/1280)
         elif rsskind == 'iron':
-            self.adb0.tap(self.scrX * 420/720, self.scrY * 940/1280)
+            self.adb0.tap(self.scrX * 300/720, self.scrY * 940/1280)
         elif rsskind == 'mithril':
-            self.adb0.tap(self.scrX * 530/720, self.scrY * 940/1280)
+            self.adb0.tap(self.scrX * 420/720, self.scrY * 940/1280)
         elif rsskind == 'coin' or rsskind == 'gold':
+            self.adb0.tap(self.scrX * 530/720, self.scrY * 940/1280)
+        elif rsskind == 'camp' or rsskind == 'tent':
             self.adb0.tap(self.scrX * 650/720, self.scrY * 940/1280)
 
         if lvl is not None:
@@ -373,10 +379,10 @@ parser.add_argument('-f', '--task-file=', dest='file',
                     help="a taskfile or a config file that contains a tasklist. If the given file dosen't exist or dosen't contain a tasklist pycok will create one or rewrite it with default module")
 parser.add_argument('-d', '--device', action='append',
                     nargs='+', help='add devices scrpit should be used to')
-parser.add_argument('--sleep', type=int,
-                    help='add devices scrpit should be used to')
+parser.add_argument('--sleep', type=int, help='sleep seconds before run')
+parser.add_argument('--emu',action='store_true',help='')
+parser.add_argument('--speed',type=int, help='')
 
-cok = pycok()
 
 _TASKLIST_default = [
     {
@@ -495,13 +501,15 @@ class Task(dict):
             return True
         return False
 
-    def updateEvery(self):
+    def updateEvery(self,force=False):
         "prepare for next outer loop"
         assert(self.every > 0)
 
-        if not self.isActive():
+        if force or not self.isActive():
             if self.until > 0:
                 dur = self.until-self.start
+                if self.countdown==0:
+                    self.until+=self.every
                 while self.until < time.time():
                     self.until += self.every
                 self.start = self.until-dur
@@ -517,9 +525,9 @@ class Task(dict):
             else:
                 self.time = time.time()
 
-    def runTask(self, sub=None):  # TODO
+    def runTask(self, cok, sub=None):  # TODO
         if sub:
-            return self.__runSub(self[sub])
+            return self.__runSub(cok, self[sub])
         if self.countdown > 0:
             self.countdown -= 1
         if self.fastrun:
@@ -528,17 +536,17 @@ class Task(dict):
             self.time += self.interval
 
         if self.prepare:
-            self.runTask('prepare')
+            self.runTask(cok, 'prepare')
         if self.run:
-            self.runTask('run')
+            self.runTask(cok, 'run')
         if self.after:
-            self.runTask('after')
+            self.runTask(cok, 'after')
 
-    def __runSub(self, s):
+    def __runSub(self, cok, s):
         if len(s) > 1:
-            return subp.get(s[0])(**s[1])
+            return subp.get(s[0])(cok,**s[1])
         else:
-            return subp.get(s[0])()
+            return subp.get(s[0])(cok)
 
 
 __tasklist = None
@@ -600,21 +608,21 @@ def subtask(funcOrName):
 AUTOEXIT = 60
 TIMEFORMAT = "%Y-%m-%d %a %H:%M:%S"  # "%a %b %d %H:%M:%S %Y"
 INTERVAL = 10
-
+COKSPEED = 80
 
 # check tasklist
 
 
-def init(listFile=None):
-    if cok.get_status() == 'sleeping':
-        cok.adb0.wakeup()
-        cok.wait()
-        cok.adb0.unlock()
-        cok.wait()
+def initTasklist(listFile=None):
+    # if cok.get_status() == 'sleeping':
+    #     cok.adb0.wakeup()
+    #     cok.wait()
+    #     cok.adb0.unlock()
+    #     cok.wait()
 
     # make sure the game is running
-    cok.launchgame()
-    cok.wait(10)
+    # cok.launchgame()
+    # cok.wait(10)
 
     with GetTasklist(listFile, True) as tasklist:
         for task in tasklist:
@@ -627,9 +635,9 @@ def init(listFile=None):
                 if task.until > 0:
                     task.until = task.start + lasts
             elif task.every > 0:
-                task.updateEvery()
-                if task.time < task.start or task.time > task.until:
-                    task.time = task.start
+                task.updateEvery(force=True)
+                # if task.time < task.start or task.time > task.until:
+                #     task.time = task.start
             # 把开始时间是很久之前的任务改到还差一个‘interval’就要等的时间点
             if task.nloop != 0 and task.interval > 0:
                 while task.time+task.interval < time.time():
@@ -638,12 +646,12 @@ def init(listFile=None):
 
 # run task loop
 ###################################
-def schedule(device=None, package=None):
-    if device:
-        cok.adb0.device = device
+def schedule(device=None, package=None,emu=False):
+    cok = pycok(device=device,package=package)
+    cok.speed=COKSPEED
 
     informIdle = True
-    sleep = False
+    sleeping = False
     battery = cok.getBatteryLevel()
 
     with GetTasklist() as tasklist:
@@ -656,7 +664,7 @@ def schedule(device=None, package=None):
                     print('Running task \'%s\'in' % task['name'], time.strftime(
                         TIMEFORMAT, time.localtime()))
 
-                    task.runTask()
+                    task.runTask(cok)
 
                     print('Task \'%s\' ended in' % task['name'], time.strftime(
                         '%Hhr%Mm%Ss', time.gmtime(time.time()-startTime)))
@@ -673,7 +681,7 @@ def schedule(device=None, package=None):
                         if task.get('time', soon['time']) < soon['time']:
                             soon = task
 
-            if informIdle:
+            if informIdle and (soon is None or soon.time-time.time() > 60):
                 informIdle = False
                 timeIdleStart = int(time.time())
                 print('idle ...')
@@ -687,9 +695,9 @@ def schedule(device=None, package=None):
                     print('none task is waiting..')
 
             if soon is None:
-                if not sleep:
+                if not sleeping:
                     cok.adb0.sleep()
-                    sleep = True
+                    sleeping = True
                 exitCountdown = AUTOEXIT-(int(time.time())-timeIdleStart)
                 print('program will stop in %2ds' %
                       exitCountdown, end='\r', flush=True)
@@ -700,26 +708,35 @@ def schedule(device=None, package=None):
 
             time.sleep(INTERVAL)
 
-            if not sleep:
-                if cok.get_status() == 'sleeping':
+            if not emu:
+                if not sleeping:
+                    if cok.get_status() == 'sleeping':
+                        cok.adb0.wakeup()
+                        cok.wait()
+                        cok.adb0.unlock()
+                        cok.wait()
+                        cok.launchgame()
+                        cok.wait(10)
+                    battery = cok.getBatteryLevel()
+                    if not emu and battery < 20:
+                        cok.adb0.sleep()
+                        sleeping = True
+                        print('low battery. sleeping..')
+                    elif soon is None or soon.time-time.time() > 600:
+                        if emu:
+                            cok.adb0.input('keyevent','KEYCODE_HOME')
+                            cok.wait()
+                            cok.forceStop()
+                        cok.adb0.sleep()
+                        sleeping = True
+                        print('sleeping...')
+                elif soon is not None and soon.time-time.time() < 120:
+                    print('wake up\n')
+                    informIdle=True
                     cok.adb0.wakeup()
                     cok.wait()
                     cok.adb0.unlock()
                     cok.wait()
                     cok.launchgame()
                     cok.wait(10)
-                battery = cok.getBatteryLevel()
-                if battery < 20:
-                    cok.adb0.sleep()
-                    sleep = True
-                elif soon.time-time.time() > 600:
-                    cok.adb0.sleep()
-                    sleep = True
-            elif soon is not None and soon.time-time.time() < 120:
-                cok.adb0.wakeup()
-                cok.wait()
-                cok.adb0.unlock()
-                cok.wait()
-                cok.launchgame()
-                cok.wait(10)
-                sleep = False
+                    sleeping = False

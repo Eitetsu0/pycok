@@ -4,22 +4,15 @@
 import math
 import time
 
-from pycok import cok, subtask, schedule
+from pycok import subtask, schedule
 import pycok
-
-cok.speed = 80
-cok.lineSize = 6
-
-pycok.AUTOEXIT = 10
-pycok.INTERVAL = 10
-pycok.TIMEFORMAT = "%Y-%m-%d %a %H:%M:%S"  # "%a %b %d %H:%M:%S %Y"
 
 
 ##########################################
 # subtasks
 ##########################################
 @subtask
-def relaunch(hard=False):
+def relaunch(cok,hard=False):
     if hard:
         packages = cok.adb0.listPackage('cok')
         for p in packages:
@@ -29,29 +22,31 @@ def relaunch(hard=False):
 
 
 @subtask
-def vipsearch(rsskind=None, lvl=None, unique=None):
+def vipsearch(cok,rsskind=None, lvl=None, unique=None):
     cok.vipsearch(rsskind=rsskind, lvl=lvl, unique=unique)
 
 
 @subtask
-def quickgather(lines=3,stype='iron',level=6,preset=None):
+def quickgather(cok,lines=3,stype='iron',level=6,preset=None):
     # print('Garthering start...')
     cok.vipsearch(stype, level)
     cok.gather(preset=preset,**{stype:level})
-    n = lines
-    while n > 1:
+    n = lines - 1
+    print('    gathering line left', n, '.')
+    while n > 0:
         n -= 1
         cok.gather(preset=preset)
-        print('    gathering line left', n, ' .')
+        print('    gathering line left', n, '.')
         cok.wait(1)
 
 
 @subtask
-def monsterkill(times=10, lines=5,wait=100):
+def monsterkill(cok,times=10, lines=5,wait=100):
     if lines>1:
         lines-=1
     print('Starting Monster loop')
-    cok.vipsearch('monster')
+    cok.resetCam(worldMap=True)
+    cok.wait(10)
     cok.vipsearch('monster')
     n = 0
     print(' loop', times, 'times in %d' % math.ceil(times/(lines)), 'groups ..')
@@ -72,18 +67,35 @@ def monsterkill(times=10, lines=5,wait=100):
         cok.wait(wait/20)
     print(' end.')
 
-##############################################################
+
+@subtask
+def takePotion(cok,pos=0):
+    print('takePotion')
+    cok.adb0.tap(580,390)
+
+###############################################################
+# end subtasks
+###############################################################
 
 
 if __name__ == '__main__':
 
     args = pycok.parser.parse_args()  # TODO
 
-    if args.sleep:
-        time.sleep(args.sleep)
+    # cok.lineSize = 6
 
+    pycok.AUTOEXIT = 10
+    pycok.INTERVAL = 10
+    pycok.TIMEFORMAT = "%Y-%m-%d %a %H:%M:%S"  # "%a %b %d %H:%M:%S %Y"
+    pycok.COKSPEED = 80
+    pycok.initTasklist()
+
+    if args.speed:
+        pycok.COKSPEED=int(args.speed)
+
+    device = None
     if args.device is None:
-        d = cok.adb0.listdevice()
+        d = pycok.pycok(mode='list').adb0.listdevice()
         if len(d) == 0:
             print('no devices connected')
             exit(1)
@@ -91,12 +103,17 @@ if __name__ == '__main__':
             print('multiple connected devices:')
             i = 0
             while i < len(d):
-                print('    [%d] %s' % (i, d))
+                print('    [%d] %s' % (i, d[i]))
                 i += 1
-            s = int(input('select number device:'))
+            s = int(input('select device:'))
+            device = d[s][0]
+    else:
+        device=args.device[0][0]  # TODO
 
-    pycok.init()
-    schedule()
+    if args.sleep:
+        print('now:',time.strftime(pycok.TIMEFORMAT), ' ; ', 'sleep',args.sleep,'seconds')
+        time.sleep(args.sleep)
+    schedule(device=device,emu=args.emu)
     # if args.device:
     #     for dev in args.device:
     #         for d in dev:
