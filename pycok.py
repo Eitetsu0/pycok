@@ -372,15 +372,15 @@ if __name__ == '__main__':
 ###################### schedul section ####
 parser = argparse.ArgumentParser(prog='coktask', description='Run cok tasks')
 parser.add_argument('-v', '--version', action='version',
-                    version='%(prog)s 0.5')
+                    version='%(prog)s 0.6')
 parser.add_argument('-s', '--server', action='version',
                     version='distributed sys is under working', help='connect to a remote server')
 parser.add_argument('-f', '--task-file=', dest='file',
                     help="a taskfile or a config file that contains a tasklist. If the given file dosen't exist or dosen't contain a tasklist pycok will create one or rewrite it with default module")
 parser.add_argument('-d', '--device', action='append',
-                    nargs='+', help='add devices scrpit should be used to')
+                    nargs='+', help='add devices')
 parser.add_argument('--sleep', type=int, help='sleep seconds before run')
-parser.add_argument('--emu',action='store_true',help='')
+parser.add_argument('--emu',action='store_true',help='indicate that the decice is an emulator')
 parser.add_argument('--speed',type=int, help='')
 
 
@@ -413,7 +413,7 @@ _TASKLIST_default = [
         'every': 0,
         'enable': False,
         'fastrun': True,  # run this task as soon as manager started
-        # 如果fastrun==True，start和until都代表相对时间，否则为绝对时间
+        # if fastrun==True，start and until represent a relative time，or it represent a absolute time
     },
 
 ]

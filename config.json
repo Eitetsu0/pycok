@@ -1,0 +1,75 @@
+[
+    {
+        "after": null,
+        "enable": true,
+        "fastrun": false,
+        "interval": 4704,
+        "name": "hunt",
+        "nloop": 1,
+        "prepare": [
+            "monsterkill",
+            {
+                "times":4,
+                "lines":3,
+                "wait":60
+            }
+        ],
+        "run":null,
+        "every": 1200,
+        "start": 1528940400,
+        "time": 0,
+        "until": 1528940600
+    },
+    {
+        "after": null,
+        "enable": true,
+        "fastrun": false,
+        "interval": 4900,
+        "name": "gather",
+        "nloop": 1,
+        "prepare":null,
+        "run": [
+            "quickgather",
+            {
+                "lines":2,
+                "stype":"mithril",
+                "level":6,
+                "preset":"speed"
+            }
+        ],
+        "every": 6000,
+        "start": 1528934400,
+        "time": 0,
+        "until": 1528934900
+    },
+    {
+        "after": [
+            "monsterkill",
+            {
+                "times":6,
+                "lines":4
+            }
+        ],
+        "enable": true,
+        "fastrun": false,
+        "interval": 1000,
+        "name": "monsterDay",
+        "nloop": -1,
+        "prepare": [
+            "monsterkill",
+            {
+                "times":9,
+                "lines":4
+            }
+        ],
+        "run": [
+            "takePotion",
+            {
+            }
+        ],
+        "every": 1209600,
+        "start": 1528848000,
+        "time": 0,
+        "until": 1528934400
+    }
+]
