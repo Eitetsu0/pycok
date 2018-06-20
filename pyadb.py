@@ -42,15 +42,14 @@ class adb(object):
                 precmd+list(cmd), stdout=subprocess.PIPE, timeout=timeout)
         except subprocess.TimeoutExpired:
             try:
-                subprocess.run(precmd + ['shell', 'input', 'keyevent',
-                               'KEYCODE_WAKEUP'], stdout=subprocess.PIPE, timeout=30)
+                subprocess.run(precmd + ['shell', 'input', 'keyevent','KEYCODE_WAKEUP'], stdout=subprocess.PIPE, timeout=30)
                 self.wakeup()
                 self.unlock()
             except subprocess.TimeoutExpired:
                 raise Exception(
                     'timeout without reply from device. is it awaken?')
             p = subprocess.run(
-                precmd+list(cmd), stdout=subprocess.PIPE, timeout=5)
+                precmd+list(cmd), stdout=subprocess.PIPE, timeout=timeout)
         try:
             p.check_returncode()
         except subprocess.CalledProcessError as e:
