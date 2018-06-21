@@ -219,7 +219,7 @@ class pycok(object):
         self.adb0.tap(self.scrX * 438/720, self.scrY * 1210/1280)
         self.wait(0.5)
 
-    def tap(self, obj='blank'):
+    def tap(self, obj='blank', behav=None):
         """
         acceptable obj by now:
             'blank','vipsearch','changeMap','keyback','tips','center'
@@ -242,6 +242,23 @@ class pycok(object):
             return self.adb0.tap(self.scrX*0.5, self.scrY * 690/1280)
         if obj == 'occupy':
             return self.adb0.tap(self.scrX * 520/720, self.scrY * 650/1280)
+        # if obj == 'user_icon':
+        #     return self.adb0.tap(self.scrX * 50/720, self.scrY * 50/1280)
+        # if obj == 'setting':
+        #     return self.adb0.tap(self.scrX * 670/720, self.scrY * 1230/1280)
+
+        loc={
+            'user_icon':(50,50),
+            'setting':(670,1230),
+            'Account':(110,360),
+            'switchAccount':(360,960),
+            'facebook':(360,370),
+            'next':(360,1000),
+            'ok_mid':(360,785),
+        }
+        return self.adb0.tap(self.scrX * loc[obj][0]/720, self.scrY * loc[obj][1]/1280)
+
+        raise CokException('unknown object %s' % obj)
 
     # def removetips(self):
     #     self.tap('tips')
@@ -329,7 +346,7 @@ class pycok(object):
         self.wait(1)
         self.killmonsterin(preset=preset)
 
-    def writeTextBox(self, x, y, text, delete=5):
+    def writeTextBox(self, x, y, text, delete=5, enter=True):
         self.adb0.tap(x, y)
         self.wait(0.2)
         while delete > 0:
@@ -337,8 +354,9 @@ class pycok(object):
             self.adb0.input('keyevent', 'KEYCODE_DEL')
         self.adb0.input('text', str(text))
         self.wait()
-        self.adb0.input('keyevent', 'KEYCODE_NUMPAD_ENTER')
-        self.wait()
+        if enter:
+            self.adb0.input('keyevent', 'KEYCODE_NUMPAD_ENTER')
+            self.wait()
 
     def wait(self, val=0.2):
         if val is not None:
@@ -350,6 +368,39 @@ class pycok(object):
             i = i.split()
             if i[0] == 'level:':
                 return int(i[1])
+
+    def changeAcc(self,user=None,passw=None,package=None):
+        if package is not None and package not in self.__gamepackage:
+            self.forceStop()
+            self.wait()
+            self.launchgame(package)
+            self.wait(10)
+        if user is not None and passw is not None:
+            self.resetCam()
+            self.wait()
+            self.tap('user_icon')
+            self.wait(1)
+            self.tap('setting')
+            self.wait(2)
+            self.tap('Account')
+            self.wait(1)
+            self.tap('switchAccount')
+            self.wait(1)
+            self.tap('facebook')
+            self.wait(3)
+            self.writeTextBox(self.scrX * 250/720, self.scrY*610/1280, user, 0, False)
+            self.adb0.tap(self.scrX * 250/720, self.scrY*700/1280)
+            self.wait()
+            self.writeTextBox(self.scrX * 250/720, self.scrY*700/1280, passw, 0)
+            self.wait(3)
+            self.tap('next')
+            self.wait(3)
+            self.tap('ok_mid',(360,785,0.5))
+            self.wait(0.5)
+            self.tap('ok_mid',(360,785,0.5))
+            self.wait(0.5)
+            self.tap('ok_mid',(360,785))
+            self.wait(10)
 
 
 ####################################################################################################
