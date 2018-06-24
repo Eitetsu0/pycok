@@ -41,13 +41,13 @@ def quickgather(cok,lines=3,stype='iron',level=6,preset=None):
 
 
 @subtask
-def monsterkill(cok,times=10, lines=5,wait=100):
+def monsterkill(cok, lvl=None,times=10, lines=5,wait=100):
     if lines>1:
         lines-=1
     print('Starting Monster loop')
     cok.resetCam(worldMap=True)
     cok.wait(10)
-    cok.vipsearch('monster')
+    cok.vipsearch('monster',lvl)
     n = 0
     print(' loop', times, 'times in %d' % math.ceil(times/(lines)), 'groups ..')
     while n < times:
@@ -66,6 +66,11 @@ def monsterkill(cok,times=10, lines=5,wait=100):
         print('.', end='', flush=True)
         cok.wait(wait/20)
     print(' end.')
+
+
+@subtask
+def sheild(cok,hour=8,miss=60):
+    cok.shield(hour=hour,miss=miss)
 
 
 @subtask
@@ -88,16 +93,15 @@ if __name__ == '__main__':
     pycok.INTERVAL = 10
     pycok.TIMEFORMAT = "%Y-%m-%d %a %H:%M:%S"  # "%a %b %d %H:%M:%S %Y"
     pycok.COKSPEED = 80
-    pycok.initTasklist()
 
     if args.speed:
         pycok.COKSPEED=int(args.speed)
 
-    device = None
+    devices = []
     if args.device is None:
         d = pycok.pycok(mode='list').adb0.listdevice()
         if len(d) == 0:
-            print('no devices connected')
+            print('no device connected')
             exit(1)
         elif len(d) > 1:
             print('multiple connected devices:')
@@ -106,14 +110,16 @@ if __name__ == '__main__':
                 print('    [%d] %s' % (i, d[i]))
                 i += 1
             s = int(input('select device:'))
-            device = d[s][0]
+            devices = d[s][0]
     else:
-        device=args.device[0][0]  # TODO
+        devices=args.device[0][0]  # TODO
 
     if args.sleep:
         print('now:',time.strftime(pycok.TIMEFORMAT), ' ; ', 'sleep',args.sleep,'seconds')
         time.sleep(args.sleep)
-    schedule(device=device,emu=args.emu)
+    s=schedule(configFile='./config.json',device=None,emu=args.emu)
+    s.schedule()
+
     # if args.device:
     #     for dev in args.device:
     #         for d in dev:

@@ -1,75 +1,152 @@
 [
     {
-        "after": null,
-        "enable": true,
-        "fastrun": false,
-        "interval": 4704,
-        "name": "hunt",
-        "nloop": 1,
-        "prepare": [
-            "monsterkill",
+        "name":"Angle",
+        "username":"asdfn@xxx.com",
+        "passw":"password",
+        "package":"gp",
+        "tasklist":[
             {
-                "times":4,
-                "lines":3,
-                "wait":60
+                "after": null,
+                "enable": true,
+                "fastrun": false,
+                "interval": 0,
+                "name": "sheild",
+                "nloop": 1,
+                "prepare":null,
+                "run": [
+                    "sheild",
+                    {
+                    }
+                ],
+                "every": 28800,
+                "start": 1529804890,
+                "time": 0,
+                "until": 1529806090
+            },
+            {
+                "after": null,
+                "enable": true,
+                "fastrun": false,
+                "interval": 4704,
+                "name": "hunt",
+                "nloop": 1,
+                "prepare": [
+                    "monsterkill",
+                    {
+                        "lvl":30,
+                        "times":4,
+                        "lines":3,
+                        "wait":60
+                    }
+                ],
+                "run":null,
+                "every": 1800,
+                "start": 0,
+                "time": 0,
+                "until": 200
+            },
+            {
+                "after": null,
+                "enable": true,
+                "fastrun": false,
+                "interval": 4900,
+                "name": "gather",
+                "nloop": 1,
+                "prepare":null,
+                "run": [
+                    "quickgather",
+                    {
+                        "lines":2,
+                        "stype":"mithril",
+                        "level":6,
+                        "preset":"speed"
+                    }
+                ],
+                "every": 6000,
+                "start": 1528934400,
+                "time": 0,
+                "until": 1528934900
+            },
+            {
+                "after": [
+                    "monsterkill",
+                    {
+                        "lvl":30,
+                        "times":6,
+                        "lines":4
+                    }
+                ],
+                "enable": true,
+                "fastrun": false,
+                "interval": 1000,
+                "name": "monsterDay",
+                "nloop": -1,
+                "prepare": [
+                    "monsterkill",
+                    {
+                        "times":9,
+                        "lines":4
+                    }
+                ],
+                "run": [
+                    "takePotion",
+                    {
+                    }
+                ],
+                "every": 1209600,
+                "start": 1528848000,
+                "time": 0,
+                "until": 1528934400
             }
-        ],
-        "run":null,
-        "every": 1200,
-        "start": 1528940400,
-        "time": 0,
-        "until": 1528940600
+        ]
     },
     {
-        "after": null,
-        "enable": true,
-        "fastrun": false,
-        "interval": 4900,
-        "name": "gather",
-        "nloop": 1,
-        "prepare":null,
-        "run": [
-            "quickgather",
+        "name":"demon",
+        "username":"demon@xxx.com",
+        "passw":"password",
+        "tasklist":[
             {
-                "lines":2,
-                "stype":"mithril",
-                "level":6,
-                "preset":"speed"
-            }
-        ],
-        "every": 6000,
-        "start": 1528934400,
-        "time": 0,
-        "until": 1528934900
-    },
-    {
-        "after": [
-            "monsterkill",
+                "after": null,
+                "enable": true,
+                "fastrun": true,
+                "interval": 16000,
+                "name": "hunt",
+                "nloop": -1,
+                "prepare": [
+                    "monsterkill",
+                    {
+                        "lvl":5,
+                        "times":10,
+                        "lines":3
+                    }
+                ],
+                "run":null,
+                "every": 0,
+                "start": 0,
+                "time": 0,
+                "until": -1
+            },
             {
-                "times":6,
-                "lines":4
+                "after": null,
+                "enable": true,
+                "fastrun": true,
+                "interval": 14800,
+                "name": "gather",
+                "nloop": 1,
+                "prepare":null,
+                "run": [
+                    "quickgather",
+                    {
+                        "lines":4,
+                        "stype":"wood",
+                        "level":7
+                    }
+                ],
+                "every": 16000,
+                "start": 300,
+                "time": 0,
+                "until": -1
             }
-        ],
-        "enable": true,
-        "fastrun": false,
-        "interval": 1000,
-        "name": "monsterDay",
-        "nloop": -1,
-        "prepare": [
-            "monsterkill",
-            {
-                "times":9,
-                "lines":4
-            }
-        ],
-        "run": [
-            "takePotion",
-            {
-            }
-        ],
-        "every": 1209600,
-        "start": 1528848000,
-        "time": 0,
-        "until": 1528934400
+        ]
     }
 ]

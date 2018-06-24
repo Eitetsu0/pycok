@@ -5,7 +5,6 @@ import argparse
 import json
 import time
 import multiprocessing
-from contextlib import contextmanager
 from os import path
 
 from pyadb import adb
@@ -20,6 +19,7 @@ class pycok(object):
 
     def __init__(self, mode='adb', adbpath='default', device=None, package=None, vip=True):
         self.speed = 100
+        self.acc = ''
         if mode == 'api':
             # raise
             # TODO:webcok
@@ -38,18 +38,14 @@ class pycok(object):
                 self.adb0.unlock()
                 self.wait()
 
-            # make sure the game is running
-            # if self.get_status() == 'closing':
             if package:
-                self.launchgame(package)
+                self.launchgame(package, update=True)
             else:
                 try:
-                    self.launchgame('gp')
+                    self.launchgame('gp', update=True)
                 except CokException:
-                    self.launchgame(0)
-            self.wait(10)
-            # else:  # TODO:
-            #     self.__gamepackage = self.adb0.listPackage('cok')[0]
+                    self.launchgame(0, update=True)
+            self.wait()
 
     # @property
     # def adbpath(self):
@@ -74,6 +70,14 @@ class pycok(object):
             val = 200
         self._waittingtime = 100/val
 
+    @property
+    def package(self):
+        return self.__gamepackage
+
+    # @package.setter
+    # def package(self,val):
+    #     return self.launchgame(val,True)
+
     def get_status(self):
         s = self.adb0.adb('shell', 'dumpsys', 'window', 'policy')
         if ('mShowingLockscreen=false'not in s) or ('isStatusBarKeyguard' in s and 'isStatusBarKeyguard=false' not in s):
@@ -87,7 +91,7 @@ class pycok(object):
             return 'closing'
         # return 'running'#TODO:
 
-    def launchgame(self, p=None):
+    def launchgame(self, p=None, update=False):
         packages = self.adb0.listPackage('cok')
         if isinstance(p, int):
             self.__gamepackage = packages[p]
@@ -100,10 +104,11 @@ class pycok(object):
                     self.__gamepackage = packages[i]
                     break
                 i += 1
-        return self.adb0.launch(self.__gamepackage)
+        if not update:
+            return self.adb0.launch(self.__gamepackage)
 
     def forceStop(self):
-        return self.adb0.adb('shell','am','force-stop',self.__gamepackage)
+        return self.adb0.adb('shell', 'am', 'force-stop', self.__gamepackage)
 
     def listGamepackage(self):
         return self.adb0.listPackage('cok')
@@ -124,7 +129,7 @@ class pycok(object):
             default:None
         """
 
-        s = {'sawmill','wood', 'farm','food', 'iron', 'mithril', 'gold'}
+        s = {'sawmill', 'wood', 'farm', 'food', 'iron', 'mithril', 'gold'}
         for key in kind.keys():
             if key not in s:
                 kind.pop(key)
@@ -184,16 +189,16 @@ class pycok(object):
         self.wait(0.5)
         if rsskind == 'monster':
             self.adb0.tap(self.scrX * 100/720, self.scrY * 940/1280)
-            if unique is not None:
-                # TODO:opencv
-                # search monster once
-                self.adb0.tap(self.scrX * 438/720, self.scrY * 1210/1280)
-                # self.tap('vipsearch')
-                # tap vipsearch without killing tips
-                self.adb0.tap(self.scrX * 50/720, self.scrY * 950/1280)
-                # toggle 'unique'
-                # cant judge without opencv
-                self.adb0.tap(self.scrX * 100/720, self.scrY * 940/1280)
+            # if unique is not None:
+            #     # TODO:opencv
+            #     # search monster once
+            #     self.adb0.tap(self.scrX * 438/720, self.scrY * 1210/1280)
+            #     # self.tap('vipsearch')
+            #     # tap vipsearch without killing tips
+            #     self.adb0.tap(self.scrX * 50/720, self.scrY * 950/1280)
+            #     # toggle 'unique'
+            #     # cant judge without opencv
+            #     self.adb0.tap(self.scrX * 100/720, self.scrY * 940/1280)
         elif rsskind is not None:
             # swipe so other icons shell be in their position
             self.adb0.swipe((self.scrX * 600/720, self.scrY * 940/1280),
@@ -219,7 +224,7 @@ class pycok(object):
         self.adb0.tap(self.scrX * 438/720, self.scrY * 1210/1280)
         self.wait(0.5)
 
-    def tap(self, obj='blank', behav=None):
+    def tap(self, obj='blank', behav=None):  # TODO
         """
         acceptable obj by now:
             'blank','vipsearch','changeMap','keyback','tips','center'
@@ -242,23 +247,25 @@ class pycok(object):
             return self.adb0.tap(self.scrX*0.5, self.scrY * 690/1280)
         if obj == 'occupy':
             return self.adb0.tap(self.scrX * 520/720, self.scrY * 650/1280)
+        if obj == 'citybuff':
+            return self.adb0.tap(self.scrX * 360/720, self.scrY * 390/1280)
         # if obj == 'user_icon':
         #     return self.adb0.tap(self.scrX * 50/720, self.scrY * 50/1280)
         # if obj == 'setting':
         #     return self.adb0.tap(self.scrX * 670/720, self.scrY * 1230/1280)
 
-        loc={
-            'user_icon':(50,50),
-            'setting':(670,1230),
-            'Account':(110,360),
-            'switchAccount':(360,960),
-            'facebook':(360,370),
-            'next':(360,1000),
-            'ok_mid':(360,785),
+        loc = {
+            'user_icon': (50, 50),
+            'setting': (670, 1230),
+            'Account': (110, 360),
+            'switchAccount': (360, 960),
+            'facebook': (360, 370),
+            'next': (360, 1000),
+            'ok_mid': (360, 785),
         }
         return self.adb0.tap(self.scrX * loc[obj][0]/720, self.scrY * loc[obj][1]/1280)
 
-        raise CokException('unknown object %s' % obj)
+        raise CokException('pycok.tap: unknown object %s' % obj)
 
     # def removetips(self):
     #     self.tap('tips')
@@ -369,7 +376,7 @@ class pycok(object):
             if i[0] == 'level:':
                 return int(i[1])
 
-    def changeAcc(self,user=None,passw=None,package=None):
+    def changeAcc(self, user=None, passw=None, package=None):
         if package is not None and package not in self.__gamepackage:
             self.forceStop()
             self.wait()
@@ -388,19 +395,39 @@ class pycok(object):
             self.wait(1)
             self.tap('facebook')
             self.wait(3)
-            self.writeTextBox(self.scrX * 250/720, self.scrY*610/1280, user, 0, False)
+            self.writeTextBox(self.scrX * 250/720,
+                              self.scrY*610/1280, user, 0, False)
             self.adb0.tap(self.scrX * 250/720, self.scrY*700/1280)
             self.wait()
-            self.writeTextBox(self.scrX * 250/720, self.scrY*700/1280, passw, 0)
+            self.writeTextBox(self.scrX * 250/720,
+                              self.scrY*700/1280, passw, 0)
             self.wait(3)
             self.tap('next')
             self.wait(3)
-            self.tap('ok_mid',(360,785,0.5))
-            self.wait(0.5)
-            self.tap('ok_mid',(360,785,0.5))
-            self.wait(0.5)
-            self.tap('ok_mid',(360,785))
+            self.tap('ok_mid', (360, 785, 0.5))
+            self.wait(1)
+            self.tap('ok_mid', (360, 785, 0.5))
+            self.wait(1)
+            self.tap('ok_mid', (360, 785))
+            self.wait(1)
+            self.tap('ok_mid', (360, 785))
             self.wait(10)
+
+    def shield(self, hour=8, miss=60):
+        assert hour in (8, 24, 72)
+        self.resetCam(worldMap=True)
+        self.wait()
+        self.tap('center')
+        self.wait()
+        self.tap('citybuff')
+        self.wait(2)
+        self.adb0.tap(self.scrX * 360/720, self.scrY * 190/1280)
+        self.wait(0.5)
+
+        for _ in range(miss//5):
+            self.adb0.tap(self.scrX * 600/720, self.scrY * 310/1280)
+            print('.', end='', flush=True)
+        print('')
 
 
 ####################################################################################################
@@ -427,12 +454,17 @@ parser.add_argument('-v', '--version', action='version',
 parser.add_argument('-s', '--server', action='version',
                     version='distributed sys is under working', help='connect to a remote server')
 parser.add_argument('-f', '--task-file=', dest='file',
-                    help="a taskfile or a config file that contains a tasklist. If the given file dosen't exist or dosen't contain a tasklist pycok will create one or rewrite it with default module")
+                    help="""
+                    a taskfile or a config file that contains a tasklist. If the given file dosen't
+                    exist or dosen't contain a tasklist pycok will create one or rewrite it with
+                    a default module
+                    """)
 parser.add_argument('-d', '--device', action='append',
                     nargs='+', help='add devices')
 parser.add_argument('--sleep', type=int, help='sleep seconds before run')
-parser.add_argument('--emu',action='store_true',help='indicate that the decice is an emulator')
-parser.add_argument('--speed',type=int, help='')
+parser.add_argument('--emu', action='store_true',
+                    help='indicate that the decice is an emulator')
+parser.add_argument('--speed', type=int, help='')
 
 
 _TASKLIST_default = [
@@ -470,12 +502,84 @@ _TASKLIST_default = [
 ]
 
 
+class Config(dict):
+    def __init__(self, d):
+        super().__init__()
+        self['tasklist'] = TaskList(d.pop('tasklist'))  # ,_TASKLIST_default)
+        self['name'] = d.get('name', None)
+        self['username'] = d.get('username', None)
+        self['passw'] = d.get('passw', None)
+        self['package'] = d.get('package', None)
+
+        if self['name'] is None and self['username']:
+            self['name'] = self['username']
+
+    def __getattr__(self, att):
+        return self[att]
+
+    def run(self, cok, login=True, waittime=300):
+        """
+        run tasks in tasklist until the next task need to wait more than waittime
+        return the next task
+        """
+        soon = self.tasklist.getsoon()
+        if soon.time - time.time() > waittime:
+            return soon
+        if login and cok.acc != self.name:
+            print('login..')
+            cok.changeAcc(self.username, self.passw, self.package)
+            cok.acc = self.name
+        while True:
+            now = time.time()
+            if soon.time <= now:
+                assert soon.isActive()
+                startTime = time.time()
+                print('Running task \'%s\'at' % soon.name,
+                      time.strftime(TIMEFORMAT, time.localtime()))
+                soon.runTask(cok)
+                print('Task \'%s\' ended in' % soon.name, time.strftime(
+                    '%Hhr%Mm%Ss', time.gmtime(time.time()-startTime)), end='')
+                if soon.every > 0:
+                    soon.updateEvery()
+                if soon.time > now:
+                    print(' , next time will be called in', time.strftime(
+                        TIMEFORMAT, time.localtime(soon.time)))
+                print('\n')
+            elif waittime >= soon.time - now:
+                print('next task is', soon.name,
+                      'after', soon.time-now, 'seconds')
+                time.sleep(soon.time - now)
+                continue
+            else:
+                return soon
+            soon = self.tasklist.getsoon()
+
+
 class TaskList(list):
     def __init__(self, it):
-        tasklist = []
+        super().__init__()
         for task in it:
-            tasklist.append(Task(task))
-        super().__init__(tasklist)
+            self.append(task)
+
+        # update tasklist
+        for task in self:
+            if task.fastrun:
+                lasts = task.until - task.start
+                task.start += int(time.time())
+                task.time = task.start
+                if task.until > 0:
+                    task.until = task.start + lasts
+            elif task.every > 0:
+                task.updateEvery(force=True)
+                # if task.time < task.start or task.time > task.until:
+                #     task.time = task.start
+            # 把开始时间是很久之前的任务改到还差一个‘interval’就要等的时间点
+            if task.nloop != 0 and task.interval > 0:
+                # while task.time+task.interval < time.time():
+                #     task.time += task.interval
+                if task.time < time.time():
+                    task.time += ((time.time()-task.time) //
+                                  task.interval)*task.interval
 
     def __setitem__(self, index, val):
         return super().__setitem__(index, Task(val))
@@ -485,6 +589,19 @@ class TaskList(list):
 
     def append(self, task):
         super().append(Task(task))
+
+    # @property
+    def getsoon(self):
+        soon = None
+        for task in self:
+            assert isinstance(task, Task)
+            if task.enable:
+                if task.isActive() or task.start > time.time():
+                    if soon is None:
+                        soon = task
+                    elif task.time < soon.time:
+                        soon = task
+        return soon
 
 
 class SubTask(tuple):
@@ -552,26 +669,31 @@ class Task(dict):
             return True
         return False
 
-    def updateEvery(self,force=False):
+    def updateEvery(self, force=False):
         "prepare for next outer loop"
         assert(self.every > 0)
 
         if force or not self.isActive():
+            now = int(time.time())
             if self.until > 0:
                 dur = self.until-self.start
-                if self.countdown==0:
-                    self.until+=self.every
-                while self.until < time.time():
+                if self.countdown == 0:
                     self.until += self.every
+                if self.until < now:
+                    self.until += ((now-self.until)//self.every+1)*self.every
+                # while self.until < now:  # TODO
+                #     self.until += self.every
                 self.start = self.until-dur
             else:
-                if time.time() > self.start:
+                if now > self.start:
                     self.start += self.every
-                while self.start + self.every < time.time():
-                    self.start += self.every
+                # while self.start + self.every < now:
+                #     self.start += self.every
+                if self.start < now:
+                    self.start += ((now-self.start)//self.every)*self.every
 
             self.countdown = self.nloop
-            if self.start > time.time():
+            if self.start > now:
                 self.time = self.start
             else:
                 self.time = time.time()
@@ -595,53 +717,9 @@ class Task(dict):
 
     def __runSub(self, cok, s):
         if len(s) > 1:
-            return subp.get(s[0])(cok,**s[1])
+            return subp.get(s[0])(cok, **s[1])
         else:
             return subp.get(s[0])(cok)
-
-
-__tasklist = None
-
-
-@contextmanager
-def GetTasklist(file=None, load=False, update=False):
-    """
-    usage:
-        with TasksFile() as tasklist:
-            mycode...
-    """
-    global __tasklist
-    if file is None and not __tasklist:
-        file = './config.json'
-    config = None
-    if file and path.exists(file):
-        with open(file, 'r') as f:
-            config = json.load(f)
-    else:
-        update = True
-
-    if load or not __tasklist:  # read file only once
-        if isinstance(config, dict):
-            __tasklist = TaskList(config.get('tasklist', _TASKLIST_default))
-        elif isinstance(config, list):
-            __tasklist = TaskList(config)
-        else:
-            __tasklist = TaskList(_TASKLIST_default)
-
-    yield __tasklist
-
-    if update:
-        if isinstance(config, dict):
-            config['tasklist'] = __tasklist
-        else:
-            config = __tasklist
-        with open(file, 'w') as f:
-            json.dump(config, f, indent=4, sort_keys=True)
-
-
-def addtask(**ntask):
-    with GetTasklist() as tasklist:
-        tasklist.append(Task(ntask))
 
 
 subp = {}
@@ -661,133 +739,110 @@ TIMEFORMAT = "%Y-%m-%d %a %H:%M:%S"  # "%a %b %d %H:%M:%S %Y"
 INTERVAL = 10
 COKSPEED = 80
 
-# check tasklist
 
+class schedule():
+    def __init__(self, configFile=None, device=None, package=None, vip=True, emu=False):
+        self.cok = pycok(device=device, package=package, vip=vip)
+        self.cok.speed = COKSPEED
 
-def initTasklist(listFile=None):
-    # if cok.get_status() == 'sleeping':
-    #     cok.adb0.wakeup()
-    #     cok.wait()
-    #     cok.adb0.unlock()
-    #     cok.wait()
+        self.emu = emu
+        self.forceStop = False
 
-    # make sure the game is running
-    # cok.launchgame()
-    # cok.wait(10)
+        self.acclist = []
+        if configFile and path.exists(configFile):
+            with open(configFile, 'r') as f:
+                conf = json.load(f)
+                if isinstance(conf, list):
+                    for c in conf:
+                        self.acclist.append(Config(c))
+                elif isinstance(conf, dict):
+                    self.acclist.append(Config(conf))
 
-    with GetTasklist(listFile, True) as tasklist:
-        for task in tasklist:
-            # if not task.enable: #ignor disabled tasks
-            #     continue
-            if task.fastrun:
-                lasts = task.until - task.start
-                task.start += int(time.time())
-                task.time = task.start
-                if task.until > 0:
-                    task.until = task.start + lasts
-            elif task.every > 0:
-                task.updateEvery(force=True)
-                # if task.time < task.start or task.time > task.until:
-                #     task.time = task.start
-            # 把开始时间是很久之前的任务改到还差一个‘interval’就要等的时间点
-            if task.nloop != 0 and task.interval > 0:
-                while task.time+task.interval < time.time():
-                    task.time += task.interval
+    def load(self, file):
+        conf = json.load(file)
+        if isinstance(conf, list):
+            for c in conf:
+                self.acclist.append(Config(c))
+        elif isinstance(conf, dict):
+            self.acclist.append(Config(conf))
 
+    def schedule(self):
+        sleeping = False
+        battery = self.cok.getBatteryLevel()
 
-# run task loop
-###################################
-def schedule(device=None, package=None,emu=False):
-    cok = pycok(device=device,package=package)
-    cok.speed=COKSPEED
+        if self.cok.get_status() == 'sleeping':
+            self.cok.adb0.wakeup()
+            self.cok.wait()
+            self.cok.adb0.unlock()
+            self.cok.wait()
+        self.cok.launchgame()
+        self.cok.wait(10)
 
-    informIdle = True
-    sleeping = False
-    battery = cok.getBatteryLevel()
-
-    with GetTasklist() as tasklist:
         while True:
             soon = None
-            for task in tasklist:
-                assert(type(task) == Task)
-                if task.isActive() and task.time <= time.time():
-                    startTime = time.time()
-                    print('Running task \'%s\'in' % task['name'], time.strftime(
-                        TIMEFORMAT, time.localtime()))
+            for acc in self.acclist:
+                startstamp = time.time()
+                print('Start TaskList of', acc.name)
+                ntask = acc.run(self.cok)
+                print('Stop tasklist of', acc.name, 'in', time.strftime(
+                    '%Hhr%Mm%Ss', time.gmtime(time.time()-startstamp)))
+                if ntask is not None:
+                    print(
+                        'the very soon task in it is \'%s\' in' % ntask.name,
+                        time.strftime(TIMEFORMAT, time.localtime(ntask.time))
+                    )
+                print('\n')
 
-                    task.runTask(cok)
+                if soon is None or ntask.time < soon.time:
+                    soon = ntask
 
-                    print('Task \'%s\' ended in' % task['name'], time.strftime(
-                        '%Hhr%Mm%Ss', time.gmtime(time.time()-startTime)))
-                    print('\n')
-                    informIdle = True
-
-                if task.every > 0:
-                    task.updateEvery()
-
-                if task.enable:
-                    if soon is None:
-                        soon = task
-                    elif task.isActive() or task.start > time.time():
-                        if task.get('time', soon['time']) < soon['time']:
-                            soon = task
-
-            if informIdle and (soon is None or soon.time-time.time() > 60):
-                informIdle = False
-                timeIdleStart = int(time.time())
-                print('idle ...')
-                if soon is not None:
-                    nextTime = time.strftime(
-                        TIMEFORMAT, time.localtime(soon['time']))
-                    print('the very soon task is \'%s\' at' %
-                          soon['name'], nextTime)
-                    print('\n')
-                else:
-                    print('none task is waiting..')
-
-            if soon is None:
-                if not sleeping:
-                    cok.adb0.sleep()
-                    sleeping = True
-                exitCountdown = AUTOEXIT-(int(time.time())-timeIdleStart)
-                print('program will stop in %2ds' %
-                      exitCountdown, end='\r', flush=True)
-                if exitCountdown <= 0:
-                    print("\nAuto exit")
-                    # exit()
-                    return 0
-
-            time.sleep(INTERVAL)
-
-            if not emu:
-                if not sleeping:
-                    if cok.get_status() == 'sleeping':
-                        cok.adb0.wakeup()
-                        cok.wait()
-                        cok.adb0.unlock()
-                        cok.wait()
-                        cok.launchgame()
-                        cok.wait(10)
-                    battery = cok.getBatteryLevel()
-                    if not emu and battery < 20:
-                        cok.adb0.sleep()
-                        sleeping = True
-                        print('low battery. sleeping..')
-                    elif soon is None or soon.time-time.time() > 600:
-                        if emu:
-                            cok.adb0.input('keyevent','KEYCODE_HOME')
-                            cok.wait()
-                            cok.forceStop()
-                        cok.adb0.sleep()
-                        sleeping = True
-                        print('sleeping...')
-                elif soon is not None and soon.time-time.time() < 120:
-                    print('wake up\n')
-                    informIdle=True
-                    cok.adb0.wakeup()
-                    cok.wait()
-                    cok.adb0.unlock()
-                    cok.wait()
-                    cok.launchgame()
-                    cok.wait(10)
-                    sleeping = False
+            if soon is not None:
+                print('Idle until', time.strftime(
+                    TIMEFORMAT, time.localtime(soon.time)))
+                # time.sleep(soon.time - time.time() - 120)
+                if not self.emu:
+                    while True:
+                        if not sleeping:
+                            battery = self.cok.getBatteryLevel()
+                            if not self.emu and battery < 20:
+                                self.cok.adb0.sleep()
+                                sleeping = True
+                                print('low battery.\nsleeping..')
+                            elif soon is None or soon.time-time.time() > 600:
+                                if self.forceStop:
+                                    self.cok.adb0.input(
+                                        'keyevent', 'KEYCODE_HOME')
+                                    self.cok.wait()
+                                    self.cok.forceStop()
+                                self.cok.adb0.sleep()
+                                sleeping = True
+                                print('sleeping...')
+                            elif self.cok.get_status() == 'sleeping':
+                                self.cok.adb0.wakeup()
+                                self.cok.wait()
+                                self.cok.adb0.unlock()
+                                self.cok.wait()
+                                self.cok.launchgame()
+                                self.cok.wait(10)
+                        elif soon.time-time.time() < 120:
+                            print('wake up\n')
+                            self.cok.adb0.wakeup()
+                            self.cok.wait()
+                            self.cok.adb0.unlock()
+                            self.cok.wait()
+                            self.cok.launchgame()
+                            self.cok.wait(10)
+                            sleeping = False
+                        if not sleeping:
+                            break
+                        time.sleep(20)
+            else:
+                print('No task is waitting.')
+                if self.forceStop:
+                    self.cok.adb0.input('keyevent', 'KEYCODE_HOME')
+                    self.cok.wait()
+                    self.cok.forceStop()
+                if not self.emu:
+                    self.cok.adb0.sleep()
+                print('exit')
+                return
