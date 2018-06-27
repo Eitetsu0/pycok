@@ -39,7 +39,14 @@ class adb(object):
             precmd.append(self.device)
         try:
             p = subprocess.run(
-                precmd+list(cmd), stdout=subprocess.PIPE, timeout=timeout)
+                precmd+list(cmd), stdout=subprocess.PIPE, timeout=timeout, check=True)
+        except subprocess.CalledProcessError as e:
+            if self.device:
+                subprocess.run([self.adbpath, 'connect', self.device], stdout=subprocess.PIPE)
+                p = subprocess.run(
+                    precmd+list(cmd), stdout=subprocess.PIPE, timeout=timeout)
+            else:
+                raise
         except subprocess.TimeoutExpired:
             try:
                 subprocess.run(precmd + ['shell', 'input', 'keyevent','KEYCODE_WAKEUP'], stdout=subprocess.PIPE, timeout=30)
