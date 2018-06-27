@@ -355,7 +355,7 @@ class pycok(object):
 
     def writeTextBox(self, x, y, text, delete=5, enter=True):
         self.adb0.tap(x, y)
-        self.wait(0.2)
+        self.wait(0.5)
         while delete > 0:
             delete -= 1
             self.adb0.input('keyevent', 'KEYCODE_DEL')
@@ -427,6 +427,7 @@ class pycok(object):
         for _ in range(miss//5):
             self.adb0.tap(self.scrX * 600/720, self.scrY * 310/1280)
             print('.', end='', flush=True)
+            self.wait(5)
         print('')
 
 
@@ -523,36 +524,44 @@ class Config(dict):
         return the next task
         """
         soon = self.tasklist.getsoon()
-        if soon.time - time.time() > waittime:
+        now = int(time.time())
+        if soon is None or soon.time - now > waittime:
             return soon
+        print('Running TaskList of', self.name)
+        startstamp = time.time()
         if login and cok.acc != self.name:
             print('login..')
+            cok.wait(10)
             cok.changeAcc(self.username, self.passw, self.package)
             cok.acc = self.name
         while True:
-            now = time.time()
-            if soon.time <= now:
-                assert soon.isActive()
-                startTime = time.time()
-                print('Running task \'%s\'at' % soon.name,
-                      time.strftime(TIMEFORMAT, time.localtime()))
-                soon.runTask(cok)
-                print('Task \'%s\' ended in' % soon.name, time.strftime(
-                    '%Hhr%Mm%Ss', time.gmtime(time.time()-startTime)), end='')
-                if soon.every > 0:
-                    soon.updateEvery()
-                if soon.time > now:
-                    print(' , next time will be called in', time.strftime(
-                        TIMEFORMAT, time.localtime(soon.time)))
-                print('\n')
-            elif waittime >= soon.time - now:
-                print('next task is', soon.name,
-                      'after', soon.time-now, 'seconds')
-                time.sleep(soon.time - now)
-                continue
-            else:
-                return soon
             soon = self.tasklist.getsoon()
+            now = int(time.time())
+            if soon is not None:
+                if soon.time <= now:
+                    assert soon.isActive()
+                    startTime = time.time()
+                    print('Running task \'%s\'at' % soon.name,
+                          time.strftime(TIMEFORMAT, time.localtime()))
+                    soon.runTask(cok)
+                    print('Task \'%s\' ended in' % soon.name, time.strftime(
+                        '%Hhr%Mm%Ss', time.gmtime(time.time()-startTime)), end='')
+                    if soon.every > 0:
+                        soon.updateEvery()
+                    if soon.time > now:
+                        print(' , will be called next time in', time.strftime(
+                            TIMEFORMAT, time.localtime(soon.time)))
+                    print('\n')
+                    continue
+                elif waittime >= soon.time - now:
+                    print('next task is', soon.name,
+                          'after', soon.time-now, 'seconds')
+                    time.sleep(soon.time - now)
+                    continue
+
+            print('Stop tasklist of', self.name, 'in', time.strftime(
+                '%Hhr%Mm%Ss', time.gmtime(time.time()-startstamp)))
+            return soon
 
 
 class TaskList(list):
@@ -611,6 +620,9 @@ class SubTask(tuple):
 class Task(dict):
     __slots__ = tuple(list(_TASKLIST_default[0].keys())+['countdown'])
 
+    def __str__(self):
+        return '\'%s\' in ' % self.name + time.strftime(TIMEFORMAT, time.localtime(self.time))
+
     def __init__(self, it=None, **kw):
         d = {}
         if it:
@@ -657,9 +669,6 @@ class Task(dict):
         并且 countdown!=0
         """
         if self.enable:
-            # if self.every > 0:
-            #     assert(self.start >= 0 and self.until > self.start)
-            #     self.updateEvery()
             if self.start > time.time():
                 return False
             if self.countdown == 0:
@@ -676,19 +685,16 @@ class Task(dict):
         if force or not self.isActive():
             now = int(time.time())
             if self.until > 0:
+                assert self.until>self.start
                 dur = self.until-self.start
                 if self.countdown == 0:
                     self.until += self.every
                 if self.until < now:
                     self.until += ((now-self.until)//self.every+1)*self.every
-                # while self.until < now:  # TODO
-                #     self.until += self.every
                 self.start = self.until-dur
             else:
                 if now > self.start:
                     self.start += self.every
-                # while self.start + self.every < now:
-                #     self.start += self.every
                 if self.start < now:
                     self.start += ((now-self.start)//self.every)*self.every
 
@@ -696,7 +702,7 @@ class Task(dict):
             if self.start > now:
                 self.time = self.start
             else:
-                self.time = time.time()
+                self.time = int(time.time())
 
     def runTask(self, cok, sub=None):  # TODO
         if sub:
@@ -704,7 +710,7 @@ class Task(dict):
         if self.countdown > 0:
             self.countdown -= 1
         if self.fastrun:
-            self.time = time.time()+self.interval
+            self.time = int(time.time())+self.interval
         else:
             self.time += self.interval
 
@@ -776,22 +782,13 @@ class schedule():
             self.cok.adb0.unlock()
             self.cok.wait()
         self.cok.launchgame()
-        self.cok.wait(10)
+        self.cok.wait(20)
 
         while True:
             soon = None
             for acc in self.acclist:
-                startstamp = time.time()
-                print('Start TaskList of', acc.name)
                 ntask = acc.run(self.cok)
-                print('Stop tasklist of', acc.name, 'in', time.strftime(
-                    '%Hhr%Mm%Ss', time.gmtime(time.time()-startstamp)))
-                if ntask is not None:
-                    print(
-                        'the very soon task in it is \'%s\' in' % ntask.name,
-                        time.strftime(TIMEFORMAT, time.localtime(ntask.time))
-                    )
-                print('\n')
+                print('Next task in', acc.name, 'is', ntask)
 
                 if soon is None or ntask.time < soon.time:
                     soon = ntask
@@ -808,7 +805,7 @@ class schedule():
                                 self.cok.adb0.sleep()
                                 sleeping = True
                                 print('low battery.\nsleeping..')
-                            elif soon is None or soon.time-time.time() > 600:
+                            elif soon is None or soon.time-time.time() > 300:
                                 if self.forceStop:
                                     self.cok.adb0.input(
                                         'keyevent', 'KEYCODE_HOME')
@@ -831,11 +828,13 @@ class schedule():
                             self.cok.adb0.unlock()
                             self.cok.wait()
                             self.cok.launchgame()
-                            self.cok.wait(10)
+                            self.cok.wait(20)
                             sleeping = False
                         if not sleeping:
                             break
                         time.sleep(20)
+                else:
+                    time.sleep(soon.time - time.time() - 120)  # TODO
             else:
                 print('No task is waitting.')
                 if self.forceStop:

@@ -41,13 +41,16 @@ def quickgather(cok,lines=3,stype='iron',level=6,preset=None):
 
 
 @subtask
-def monsterkill(cok, lvl=None,times=10, lines=5,wait=100):
+def monsterkill(cok, quick=False, lvl=None,times=10, lines=5,wait=100):
     if lines>1:
         lines-=1
     print('Starting Monster loop')
-    cok.resetCam(worldMap=True)
-    cok.wait(10)
-    cok.vipsearch('monster',lvl)
+    if not quick:
+        cok.resetCam(worldMap=True)
+        cok.wait(10)
+        cok.vipsearch('monster',lvl)
+    elif lvl is not None:
+        cok.vipsearch('monster',lvl)
     n = 0
     print(' loop', times, 'times in %d' % math.ceil(times/(lines)), 'groups ..')
     while n < times:
@@ -64,7 +67,7 @@ def monsterkill(cok, lvl=None,times=10, lines=5,wait=100):
     print('waitting ...', end='', flush=True)
     for _ in range(20):
         print('.', end='', flush=True)
-        cok.wait(wait/20)
+        cok.wait(wait/40)
     print(' end.')
 
 
@@ -117,7 +120,7 @@ if __name__ == '__main__':
     if args.sleep:
         print('now:',time.strftime(pycok.TIMEFORMAT), ' ; ', 'sleep',args.sleep,'seconds')
         time.sleep(args.sleep)
-    s=schedule(configFile='./config.json',device=None,emu=args.emu)
+    s=schedule(configFile='./config.json',device=devices,emu=args.emu)
     s.schedule()
 
     # if args.device:
