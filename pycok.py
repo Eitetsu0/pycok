@@ -451,7 +451,7 @@ if __name__ == '__main__':
 ###################### schedul section ####
 parser = argparse.ArgumentParser(prog='coktask', description='Run cok tasks')
 parser.add_argument('-v', '--version', action='version',
-                    version='%(prog)s 0.6')
+                    version='%(prog)s 0.8')
 parser.add_argument('-s', '--server', action='version',
                     version='distributed sys is under working', help='connect to a remote server')
 parser.add_argument('-f', '--task-file=', dest='file',
