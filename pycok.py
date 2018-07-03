@@ -466,6 +466,7 @@ parser.add_argument('--sleep', type=int, help='sleep seconds before run')
 parser.add_argument('--emu', action='store_true',
                     help='indicate that the decice is an emulator')
 parser.add_argument('--speed', type=int, help='')
+parser.add_argument('--adbpath', type=str, help='set adbpath')
 
 
 _TASKLIST_default = [
@@ -744,11 +745,12 @@ AUTOEXIT = 60
 TIMEFORMAT = "%Y-%m-%d %a %H:%M:%S"  # "%a %b %d %H:%M:%S %Y"
 INTERVAL = 10
 COKSPEED = 80
+ADBPATH='default'
 
 
 class schedule():
     def __init__(self, configFile=None, device=None, package=None, vip=True, emu=False):
-        self.cok = pycok(device=device, package=package, vip=vip)
+        self.cok = pycok(device=device, adbpath=ADBPATH, package=package, vip=vip)
         self.cok.speed = COKSPEED
 
         self.emu = emu

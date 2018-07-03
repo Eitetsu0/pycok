@@ -97,6 +97,9 @@ if __name__ == '__main__':
     pycok.TIMEFORMAT = "%Y-%m-%d %a %H:%M:%S"  # "%a %b %d %H:%M:%S %Y"
     pycok.COKSPEED = 80
 
+    if args.adbpath:
+        pycok.ADBPATH=args.adbpath
+
     if args.speed:
         pycok.COKSPEED=int(args.speed)
 
@@ -121,7 +124,16 @@ if __name__ == '__main__':
         print('now:',time.strftime(pycok.TIMEFORMAT), ' ; ', 'sleep',args.sleep,'seconds')
         time.sleep(args.sleep)
     s=schedule(configFile='./config.json',device=devices,emu=args.emu)
-    s.schedule()
+
+    n=0
+    while True:
+        try:
+            s.schedule()
+        except Exception as e:
+            n+=1
+            print('Error[%s]:' % time.strftime(pycok.TIMEFOEMAT,time.localtime()), e)
+            print('count',n)
+            time.sleep(10)
 
     # if args.device:
     #     for dev in args.device:

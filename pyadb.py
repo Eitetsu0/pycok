@@ -11,6 +11,8 @@ class AdbError(subprocess.CalledProcessError):
 
 
 class adb(object):
+    adbpath=''
+
     def __init__(self, adbpath='default', device=None, cache='/tmp/pycok.cache'):
         if adbpath == 'default':
             self.adbpath = subprocess.run(
@@ -33,7 +35,7 @@ class adb(object):
 
     def __call__(self, *cmd, timeout=5, byt=False):
         # TODO: check cmd, timeout
-        precmd = [self.adbpath, ]
+        precmd = self.adbpath.split()
         if cmd[0] != 'devices' and self.device:
             precmd.append(b'-s')
             precmd.append(self.device)
@@ -41,8 +43,10 @@ class adb(object):
             p = subprocess.run(
                 precmd+list(cmd), stdout=subprocess.PIPE, timeout=timeout, check=True)
         except subprocess.CalledProcessError as e:
+            print(e)
             if self.device:
-                subprocess.run([self.adbpath, 'connect', self.device], stdout=subprocess.PIPE)
+                print('try to reconnect to device',self.device)
+                subprocess.run(self.adbpath.split() + ['connect', self.device], stdout=subprocess.PIPE)
                 p = subprocess.run(
                     precmd+list(cmd), stdout=subprocess.PIPE, timeout=timeout)
             else:
@@ -86,9 +90,9 @@ class adb(object):
     def adbpath(self, path):
         if not isinstance(path, (str, bytes)):
             raise ValueError('path must be a string')
-        path = path.strip()
-        if not os.path.exists(path):
-            raise FileNotFoundError('no adb found')
+        # path = path.strip()
+        # if not os.path.exists(path):
+        #     raise FileNotFoundError('no adb found')
         self.__adbpath = path
 
     @property

@@ -1,5 +1,5 @@
 # pycok
----
+
 This project is just for learning purpose.
 
 Based on Python3.
@@ -20,13 +20,14 @@ optional arguments:
   --sleep SLEEP         sleep seconds before run
   --emu                 indicate that the decice is an emulator
   --speed SPEED
+  --adbpath Path2adb
 ```
 
 Edit [coktask.py](./coktask.py) to add your own subtask.
 Call it in a Task.  
 Edit [config.json](./config.json) to add new account and tasks.
 
-structure of a Task (in Python):
+### Structure of a Task (in Python):
 ```python
     {
         # name of the task
@@ -59,7 +60,7 @@ structure of a Task (in Python):
     }
 ```
 
-structure of accounts' list:
+### Structure of accounts' list:
 ```python
 [
     {
