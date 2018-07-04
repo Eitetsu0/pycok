@@ -519,6 +519,7 @@ class Acc(dict):
         self['username'] = d.get('username', None)
         self['passw'] = d.get('passw', None)
         self['package'] = d.get('package', None)
+        self.enable = d.get('enable',True)
 
         if self['name'] is None and self['username']:
             self['name'] = self['username']
@@ -528,7 +529,7 @@ class Acc(dict):
 
     def run(self, cok, login=False, waittime=300):
         """
-        run tasks in tasklist until the next task need to wait more than waittime
+        run tasks in tasklist until the next task need to wait more than waittime.
         return the next task
         """
         soon = self.tasklist.getsoon()
@@ -801,8 +802,11 @@ class schedule():
         while True:
             soon = None
             for acc in self.acclist:
-                ntask = acc.run(self.cok)
-                print('Next task in', acc.name, 'is', ntask)
+                if acc.enable:
+                    ntask = acc.run(self.cok,login=True)  # TODO
+                    print('Next task in', acc.name, 'is', ntask)
+                if ntask is None:
+                    acc.enable = False
 
                 if soon is None or ntask.time < soon.time:
                     soon = ntask
