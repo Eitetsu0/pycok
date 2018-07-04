@@ -224,11 +224,17 @@ class pycok(object):
         self.adb0.tap(self.scrX * 438/720, self.scrY * 1210/1280)
         self.wait(0.5)
 
-    def tap(self, obj='blank', behav=None):  # TODO
+    def tap(self, obj='blank', behav=None):
         """
         acceptable obj by now:
             'blank','vipsearch','changeMap','keyback','tips','center'
         """
+        if behav is not None:
+            self.adb0.tap(self.scrX * behav[0]/720, self.scrY * behav[1]/1280)
+            if len(behav)>=3:
+                self.wait(behav[2])
+            return
+
         if obj == 'blank':
             return self.adb0.tap(self.scrX * 550/720, self.scrY * 50/1280)
         if obj == 'vipsearch':
@@ -263,9 +269,10 @@ class pycok(object):
             'next': (360, 1000),
             'ok_mid': (360, 785),
         }
-        return self.adb0.tap(self.scrX * loc[obj][0]/720, self.scrY * loc[obj][1]/1280)
-
-        raise CokException('pycok.tap: unknown object %s' % obj)
+        try:
+            return self.adb0.tap(self.scrX * loc[obj][0]/720, self.scrY * loc[obj][1]/1280)
+        except KeyError:
+            raise CokException('pycok.tap: unknown object %s' % obj)
 
     # def removetips(self):
     #     self.tap('tips')
@@ -394,7 +401,7 @@ class pycok(object):
             self.tap('switchAccount')
             self.wait(1)
             self.tap('facebook')
-            self.wait(3)
+            self.wait(4)
             self.writeTextBox(self.scrX * 250/720,
                               self.scrY*610/1280, user, 0, False)
             self.adb0.tap(self.scrX * 250/720, self.scrY*700/1280)
@@ -504,7 +511,7 @@ _TASKLIST_default = [
 ]
 
 
-class Config(dict):
+class Acc(dict):
     def __init__(self, d):
         super().__init__()
         self['tasklist'] = TaskList(d.pop('tasklist'))  # ,_TASKLIST_default)
@@ -519,7 +526,7 @@ class Config(dict):
     def __getattr__(self, att):
         return self[att]
 
-    def run(self, cok, login=True, waittime=300):
+    def run(self, cok, login=False, waittime=300):
         """
         run tasks in tasklist until the next task need to wait more than waittime
         return the next task
@@ -530,7 +537,7 @@ class Config(dict):
             return soon
         print('Running TaskList of', self.name)
         startstamp = time.time()
-        if login and cok.acc != self.name:
+        if (login or cok.acc != self.name) and self.username is not None and self.passw is not None:
             print('login..')
             cok.wait(10)
             cok.changeAcc(self.username, self.passw, self.package)
@@ -542,7 +549,7 @@ class Config(dict):
                 if soon.time <= now:
                     assert soon.isActive()
                     startTime = time.time()
-                    print('Running task \'%s\'at' % soon.name,
+                    print('Running task \'%s\' at' % soon.name,
                           time.strftime(TIMEFORMAT, time.localtime()))
                     soon.runTask(cok)
                     print('Task \'%s\' ended in' % soon.name, time.strftime(
@@ -563,6 +570,11 @@ class Config(dict):
             print('Stop tasklist of', self.name, 'in', time.strftime(
                 '%Hhr%Mm%Ss', time.gmtime(time.time()-startstamp)))
             return soon
+
+    def login(self,cok):
+        print('login..')
+        cok.changeAcc(self.username, self.passw, self.package)
+        cok.acc = self.name
 
 
 class TaskList(list):
@@ -694,7 +706,7 @@ class Task(dict):
                     self.until += ((now-self.until)//self.every+1)*self.every
                 self.start = self.until-dur
             else:
-                if now > self.start:
+                if now > self.start and self.countdown == 0:
                     self.start += self.every
                 if self.start < now:
                     self.start += ((now-self.start)//self.every)*self.every
@@ -762,17 +774,17 @@ class schedule():
                 conf = json.load(f)
                 if isinstance(conf, list):
                     for c in conf:
-                        self.acclist.append(Config(c))
+                        self.acclist.append(Acc(c))
                 elif isinstance(conf, dict):
-                    self.acclist.append(Config(conf))
+                    self.acclist.append(Acc(conf))
 
     def load(self, file):
         conf = json.load(file)
         if isinstance(conf, list):
             for c in conf:
-                self.acclist.append(Config(c))
+                self.acclist.append(Acc(c))
         elif isinstance(conf, dict):
-            self.acclist.append(Config(conf))
+            self.acclist.append(Acc(conf))
 
     def schedule(self):
         sleeping = False
