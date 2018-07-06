@@ -90,25 +90,25 @@ def sendRss2(cok,loc,n=1,interval=None):
     cok.move2loc(*loc)
     cok.wait()
     cok.tap('center')
-    cok.wait(0.5)
+    cok.wait(1)
     cok.tap('ResourceHelp',(520,580,0.8))  # button in same position
     cok.tap('food',(430,410,0.2))
     cok.tap('wood',(430,315,0.2))
     cok.tap('iron',(430,600,0.2))
     # cok.tap('mithril',(430,315,0.2))
-    cok.tap('help button',(360,1230))
+    cok.tap('help button',(440,1230))
     n-=1
     while n>0:
         print('.', end='', flush=True)
         time.sleep(interval)
         cok.tap('center')
-        cok.wait(0.5)
-        cok.tap('ResourceHelp',(520,580,0.8))  # button in same position
+        cok.wait(1)
+        cok.tap('ResourceHelp',(520,580,0.8))
         cok.tap('food',(430,410,0.2))
         cok.tap('wood',(430,315,0.2))
         cok.tap('iron',(430,600,0.2))
         # cok.tap('mithril',(430,315,0.2))
-        cok.tap('help button',(360,1230))
+        cok.tap('help button',(440,1230))
         n-=1
     print()
 
