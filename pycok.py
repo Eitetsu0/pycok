@@ -543,6 +543,7 @@ class Acc(dict):
             cok.wait(10)
             cok.changeAcc(self.username, self.passw, self.package)
             cok.acc = self.name
+            cok.wait(5)
         while True:
             soon = self.tasklist.getsoon()
             now = int(time.time())
@@ -816,41 +817,45 @@ class schedule():
                     TIMEFORMAT, time.localtime(soon.time)))
                 # time.sleep(soon.time - time.time() - 120)
                 if not self.emu:
-                    while True:
-                        if not sleeping:
-                            battery = self.cok.getBatteryLevel()
-                            if not self.emu and battery < 20:
-                                self.cok.adb0.sleep()
-                                sleeping = True
-                                print('low battery.\nsleeping..')
-                            elif soon is None or soon.time-time.time() > 300:
-                                if self.forceStop:
-                                    self.cok.adb0.input(
-                                        'keyevent', 'KEYCODE_HOME')
-                                    self.cok.wait()
-                                    self.cok.forceStop()
-                                self.cok.adb0.sleep()
-                                sleeping = True
-                                print('sleeping...')
-                            elif self.cok.get_status() == 'sleeping':
-                                self.cok.adb0.wakeup()
+                    if not sleeping:
+                        battery = self.cok.getBatteryLevel()
+                        if battery < 20:
+                            self.cok.adb0.sleep()
+                            sleeping = True
+                            print('low battery.\nsleeping..')
+                            while self.cok.getBatteryLevel() < 30:
+                                time.sleep(300)
+                        elif soon.time-time.time() > 600:
+                            if self.forceStop:
+                                self.cok.adb0.input(
+                                    'keyevent', 'KEYCODE_HOME')
                                 self.cok.wait()
-                                self.cok.adb0.unlock()
-                                self.cok.wait()
-                                self.cok.launchgame()
-                                self.cok.wait(10)
-                        elif soon.time-time.time() < 120:
-                            print('wake up\n')
-                            self.cok.adb0.wakeup()
-                            self.cok.wait()
-                            self.cok.adb0.unlock()
-                            self.cok.wait()
-                            self.cok.launchgame()
-                            self.cok.wait(20)
-                            sleeping = False
-                        if not sleeping:
-                            break
-                        time.sleep(20)
+                                self.cok.forceStop()
+                            self.cok.adb0.sleep()
+                            sleeping = True
+                            print('sleeping...')
+                        # elif self.cok.get_status() == 'sleeping':
+                        #     self.cok.adb0.wakeup()
+                        #     self.cok.wait()
+                        #     self.cok.adb0.unlock()
+                        #     self.cok.wait()
+                        #     self.cok.launchgame()
+                        #     self.cok.wait(10)
+
+                idleTime=int(soon.time-time.time())
+                if idleTime > 300:
+                    time.sleep(idleTime-300)
+
+                if sleeping or self.cok.get_status() == 'sleeping':
+                    print('wake up\n')
+                    sleeping = False
+                    self.cok.adb0.wakeup()
+                    self.cok.wait()
+                    self.cok.adb0.unlock()
+                    self.cok.wait()
+                    self.cok.launchgame()
+                    self.cok.wait(30)
+                    self.cok.resetCam(worldMap=True)
                 else:
                     time.sleep(soon.time - time.time() - 120)  # TODO
             else:
