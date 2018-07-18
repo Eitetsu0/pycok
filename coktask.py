@@ -112,6 +112,36 @@ def sendRss2(cok,loc,n=1,interval=None):
         n-=1
     print()
 
+
+@subtask
+def dailyRewards(cok,t='quest'):
+    cok.resetCam()
+    cok.tap('dailyRewards',(650,413,0.2))
+    if 'signin' in t:
+        cok.tap('collect',(450,1180,0.5))
+        n=0
+        for _ in range(5):
+            cok.tap('chests',(165+n, 330,0.2))
+            n+=125
+        cok.tap('ok',(360,980,0.5))
+    if 'quest' in t:
+        cok.adb0.swipe((cok.scrX * 600/720, cok.scrY * 180/1280),(cok.scrX * 190/720, cok.scrY * 180/1280))
+        cok.wait(4)
+        cok.tap('dailyQuest',(350,180,0.2))
+        n=0
+        for _ in range(5):
+            cok.tap('dailyChest',(90+n, 570, 0.1))
+            cok.tap('collect',(360,1020,0.1))
+            cok.tap()
+            cok.tap()
+            n+=125
+        n=0
+        for _ in range(3):
+            cok.tap('weeklyChest',(160+n,390,0.1))
+            n+=200
+        cok.tap('collect',(360,970,5))
+
+
 ###############################################################
 # end subtasks
 ###############################################################

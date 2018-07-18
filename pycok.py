@@ -15,7 +15,7 @@ class CokException(Exception):
 
 
 class pycok(object):
-    __adbpath = ''
+    # __adbpath = ''
 
     def __init__(self, mode='adb', adbpath='default', device=None, package=None, vip=True):
         self.speed = 100
@@ -227,7 +227,7 @@ class pycok(object):
     def tap(self, obj='blank', behav=None):
         """
         acceptable obj by now:
-            'blank','vipsearch','changeMap','keyback','tips','center'
+            'blank','vipsearch','changeMap','keyback','tips','center'...
         """
         if behav is not None:
             self.adb0.tap(self.scrX * behav[0]/720, self.scrY * behav[1]/1280)
@@ -545,7 +545,7 @@ class Acc(dict):
             cok.acc = self.name
             cok.wait(5)
         while True:
-            soon = self.tasklist.getsoon()
+            soon = self.tasklist.getsoon(update=True)
             now = int(time.time())
             if soon is not None:
                 if soon.time <= now:
@@ -614,11 +614,12 @@ class TaskList(list):
     def append(self, task):
         super().append(Task(task))
 
-    # @property
-    def getsoon(self):
+    def getsoon(self,update=False):
         soon = None
         for task in self:
             assert isinstance(task, Task)
+            if update and task.every > 0:
+                task.updateEvery()
             if task.enable:
                 if task.isActive() or task.start > time.time():
                     if soon is None:
@@ -844,7 +845,7 @@ class schedule():
 
                 idleTime=int(soon.time-time.time())
                 if idleTime > 300:
-                    time.sleep(idleTime-300)
+                    time.sleep(idleTime-290)
 
                 if sleeping or self.cok.get_status() == 'sleeping':
                     print('wake up\n')
@@ -856,8 +857,8 @@ class schedule():
                     self.cok.launchgame()
                     self.cok.wait(30)
                     self.cok.resetCam(worldMap=True)
-                else:
-                    time.sleep(soon.time - time.time() - 120)  # TODO
+                # else:
+                    # time.sleep(soon.time - time.time() - 120)  # TODO
             else:
                 print('No task is waitting.')
                 if self.forceStop:
