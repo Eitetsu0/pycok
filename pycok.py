@@ -261,6 +261,7 @@ class pycok(object):
         #     return self.adb0.tap(self.scrX * 670/720, self.scrY * 1230/1280)
 
         loc = {
+            'alliance': (650,1240),
             'user_icon': (50, 50),
             'setting': (670, 1230),
             'Account': (110, 360),
@@ -330,14 +331,14 @@ class pycok(object):
     def selectpreset(self, preset=0):
         """
         preset can be :
-            a number in [-3,0];
+            a number in [-4,0];
             a string in ('march','load','level','speed')
         """
         if isinstance(preset, int):
             if preset > 0:
                 preset = 0
-            if preset < -3:
-                preset = -3
+            if preset < -4:
+                preset = -4
             return self.adb0.input('tap', str(int(660+preset*70)), str(int(self.scrY * 335/1280)))
         elif isinstance(preset, str):
             self.adb0.tap(self.scrX * 70/720, self.scrY * 1210/1280)

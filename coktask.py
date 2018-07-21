@@ -41,7 +41,7 @@ def quickgather(cok,lines=3,stype='iron',level=6,preset=None):
 
 
 @subtask
-def monsterkill(cok, quick=False, lvl=None,times=10, lines=5,wait=100):
+def monsterkill(cok, quick=False, lvl=None,times=10, lines=5,wait=100, preset=-1):
     if lines>1:
         lines-=1
     print('Starting Monster loop')
@@ -55,7 +55,7 @@ def monsterkill(cok, quick=False, lvl=None,times=10, lines=5,wait=100):
     print(' loop', times, 'times in %d' % math.ceil(times/(lines)), 'groups ..')
     while n < times:
         n += 1
-        cok.killMonsterQuickOnce(preset=-1)
+        cok.killMonsterQuickOnce(preset=preset)
         print('    Monster loop left', times-n, 'times.')
         cok.wait(1)
         if n<times and n % (lines) == 0:
@@ -116,7 +116,7 @@ def sendRss2(cok,loc,n=1,interval=None):
 @subtask
 def dailyRewards(cok,t='quest'):
     cok.resetCam()
-    cok.tap('dailyRewards',(650,413,0.2))
+    cok.tap('dailyRewards',(650,413,0.8))
     if 'signin' in t:
         cok.tap('collect',(450,1180,0.5))
         n=0
@@ -140,6 +140,21 @@ def dailyRewards(cok,t='quest'):
             cok.tap('weeklyChest',(160+n,390,0.1))
             n+=200
         cok.tap('collect',(360,970,5))
+
+
+@subtask
+def donate(cok):
+    cok.resetCam()
+    cok.tap('alliance')
+    cok.wait(0.5)
+    cok.adb0.swipe((cok.scrX * 360/720, cok.scrY * 1140/1280),(cok.scrX * 360/720, cok.scrY * 360/1280))
+    cok.wait(1)
+    cok.tap('Alliance Science & Donation',(360,660,0.3))
+    cok.tap('recommend',(360,350,0.3))
+    for _ in range(20):
+        cok.tap('10k',(530,930,1))
+        cok.tap('2k',(210,930,1))
+        cok.tap('400',(360,805,1))
 
 
 ###############################################################
