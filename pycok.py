@@ -685,15 +685,15 @@ class Task(dict):
         返回一个every>=0的任务是否处于 [ start, until ) 的区间内
         并且 countdown!=0
         """
-        if self.enable:
-            if self.start > time.time():
-                return False
-            if self.countdown == 0:
-                return False
-            if self.until > self.start and self.time > self.until:
-                return False
-            return True
-        return False
+        if not self.enable:
+            return False
+        if self.start > time.time():
+            return False
+        if self.countdown == 0:
+            return False
+        if self.until > self.start and self.time > self.until:
+            return False
+        return True
 
     def updateEvery(self, force=False):
         "prepare for next outer loop"
