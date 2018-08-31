@@ -116,7 +116,7 @@ def sendRss2(cok,loc,n=1,interval=None):
 @subtask
 def dailyRewards(cok,t='quest'):
     cok.resetCam()
-    cok.tap('dailyRewards',(650,413,0.8))
+    cok.tap('dailyRewards',(650,300,0.8))
     if 'signin' in t:
         cok.tap('collect',(450,1180,0.5))
         n=0
@@ -128,6 +128,7 @@ def dailyRewards(cok,t='quest'):
         cok.adb0.swipe((cok.scrX * 600/720, cok.scrY * 180/1280),(cok.scrX * 190/720, cok.scrY * 180/1280))
         cok.wait(4)
         cok.tap('dailyQuest',(350,180,0.2))
+        cok.wait(8)
         n=0
         for _ in range(5):
             cok.tap('dailyChest',(90+n, 570, 0.1))
@@ -138,8 +139,11 @@ def dailyRewards(cok,t='quest'):
         n=0
         for _ in range(3):
             cok.tap('weeklyChest',(160+n,390,0.1))
+            cok.tap('collect',(360,1000,5))
+            cok.tap()
             n+=200
-        cok.tap('collect',(360,970,5))
+        # cok.tap('collect',(360,970,5))
+        cok.wait(5)
 
 
 @subtask
@@ -200,6 +204,7 @@ if __name__ == '__main__':
         print('now:',time.strftime(pycok.TIMEFORMAT), ' ; ', 'sleep',args.sleep,'seconds')
         time.sleep(args.sleep)
     s=schedule(configFile='./config.json',device=devices,emu=args.emu)
+    s.forceStop = True
 
     n=0
     while True:

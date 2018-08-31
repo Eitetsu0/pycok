@@ -147,6 +147,8 @@ class pycok(object):
         self.tap('center')
         self.wait(0.5)
         self.tap('occupy')
+        self.wait(0.5)
+        self.tap('occupy')
         self.march(preset, dragonWord)
 
     def march(self, preset=None, dragonWord=None):
@@ -236,7 +238,7 @@ class pycok(object):
             return
 
         if obj == 'blank':
-            return self.adb0.tap(self.scrX * 550/720, self.scrY * 50/1280)
+            return self.adb0.tap(self.scrX * 480/720, self.scrY * 56/1280)
         if obj == 'vipsearch':
             self.resetCam(worldMap=True)
             # TODO:opencv
@@ -252,7 +254,7 @@ class pycok(object):
         if obj == 'center':  # a little lower than center
             return self.adb0.tap(self.scrX*0.5, self.scrY * 690/1280)
         if obj == 'occupy':
-            return self.adb0.tap(self.scrX * 520/720, self.scrY * 650/1280)
+            return self.adb0.tap(self.scrX * 520/720, self.scrY * 610/1280)
         if obj == 'citybuff':
             return self.adb0.tap(self.scrX * 360/720, self.scrY * 390/1280)
         # if obj == 'user_icon':
@@ -806,7 +808,7 @@ class schedule():
             soon = None
             for acc in self.acclist:
                 if acc.enable:
-                    ntask = acc.run(self.cok,login=True)  # TODO
+                    ntask = acc.run(self.cok,login=False)  # TODO
                     print('Next task in', acc.name, 'is', ntask)
                 if ntask is None:
                     acc.enable = False
