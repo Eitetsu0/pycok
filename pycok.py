@@ -813,7 +813,7 @@ class schedule():
                 if ntask is None:
                     acc.enable = False
 
-                if soon is None or ntask.time < soon.time:
+                if soon is None or ntask is not None and ntask.time < soon.time:
                     soon = ntask
 
             if soon is not None:
