@@ -224,7 +224,7 @@ if __name__ == '__main__':
             print('count', n)
             if n >= 20:
                 raise
-            time.sleep(10)
+            time.sleep(20)
 
     # if args.device:
     #     for dev in args.device:
