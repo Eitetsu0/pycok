@@ -134,9 +134,9 @@ class pycok(object):
             if key not in s:
                 kind.pop(key)
         self.find(**kind)
-        self.marchto(preset=preset)
+        self.marchto(preset=preset, dragon=None)
 
-    def marchto(self, x=None, y=None, preset=None, dragonWord=None):
+    def marchto(self, x=None, y=None, preset=None, dragonWord=None, dragon='default'):
         """
         preset: -3 ~ 0
              or a string in ('march','load','level','speed')
@@ -149,14 +149,19 @@ class pycok(object):
         self.tap('occupy')
         self.wait(0.5)
         self.tap('occupy')
-        self.march(preset, dragonWord)
+        self.march(preset, dragonWord, dragon)
 
-    def march(self, preset=None, dragonWord=None):
+    def march(self, preset=None, dragonWord=None, dragon='default'):
         'preset: -3 ~ 0'
         if preset is not None:
             self.selectpreset(preset)
         if dragonWord is not None:
             # TODO:
+            pass
+        if dragon is None:
+            self.tap('cancel dragon',(self.scrX * 585/720, self.scrY * 420/1280, 0.2))
+        else:
+            #TODO
             pass
         self.adb0.tap(self.scrX * 600/720, self.scrY *
                       1210/1280)  # march button
@@ -304,7 +309,7 @@ class pycok(object):
         # tap Attack button
         self.adb0.input('tap', str(self.scrX//2), str(int(self.scrY*0.73)))
         self.wait(0.3)
-        self.march(preset, dragonWord)
+        self.march(preset, dragonWord,None)
 
     def move2loc(self, x=None, y=None, kingdom=None):
         "move camera to x,y in kingdom move to last coord with no arg"

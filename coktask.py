@@ -132,12 +132,12 @@ def dailyRewards(cok, t='quest'):
         cok.tap('dailyQuest', (350, 180, 0.2))
         cok.wait(8)
         n = 0
-        for _ in range(5):
+        for _ in range(10):
             cok.tap('dailyChest', (90+n, 570, 0.1))
             cok.tap('collect', (360, 1020, 0.1))
             cok.tap()
             cok.tap()
-            n += 125
+            n += 60
         n = 0
         for _ in range(3):
             cok.tap('weeklyChest', (160+n, 390, 0.1))
@@ -172,7 +172,7 @@ def collect_Alliance_Mission(cok):
     cok.adb0.swipe((cok.scrX * 360/720, cok.scrY * 1140/1280),
                    (cok.scrX * 360/720, cok.scrY * 360/1280))
     cok.wait(1)
-    cok.tap('Alliance Mission', (360, 430, 0.3))
+    cok.tap('Alliance Mission', (360, 470, 0.3))
     cok.tap('collect all',(360, 1220, 1))
     cok.tap('random quest',(520, 130, 0.3))
     cok.tap('collect all',(360, 1220, 1))
