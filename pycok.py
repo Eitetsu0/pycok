@@ -185,7 +185,7 @@ class pycok(object):
     def vipsearch(self, rsskind=None, lvl=None, unique=None):
         """
         acceptable kind:
-            'sawmill' , 'farm' , 'iron' , 'mithril' , 'gold' , 'monster'
+            'sawmill' , 'farm' , 'iron' , 'mithril' , 'gold' , 'monster' , 'wonderTreasure'
         """
         self.tap('vipsearch')
         self.wait(0.5)
@@ -201,22 +201,31 @@ class pycok(object):
             #     # toggle 'unique'
             #     # cant judge without opencv
             #     self.adb0.tap(self.scrX * 100/720, self.scrY * 940/1280)
+        elif rsskind == 'sawmill' or rsskind == 'wood':
+            # make sure the 'unique' option hiden
+            self.adb0.tap(self.scrX * 540/720, self.scrY * 940/1280)
+            # tap 'search' button
+            self.adb0.tap(self.scrX * 438/720, self.scrY * 1210/1280)
+            self.wait(0.5)
+            self.tap('vipsearch')
+            self.wait(0.5)
+            self.adb0.tap(self.scrX * 190/720, self.scrY * 940/1280)
         elif rsskind is not None:
             # swipe so other icons shell be in their position
             self.adb0.swipe((self.scrX * 600/720, self.scrY * 940/1280),
                             (self.scrX * 190/720, self.scrY * 940/1280))
             self.wait(4)
-        if rsskind == 'sawmill' or rsskind == 'wood':
+        if rsskind == 'farm' or rsskind == 'food':
             self.adb0.tap(self.scrX * 80/720, self.scrY * 940/1280)
-        elif rsskind == 'farm' or rsskind == 'food':
-            self.adb0.tap(self.scrX * 190/720, self.scrY * 940/1280)
         elif rsskind == 'iron':
-            self.adb0.tap(self.scrX * 300/720, self.scrY * 940/1280)
+            self.adb0.tap(self.scrX * 190/720, self.scrY * 940/1280)
         elif rsskind == 'mithril':
-            self.adb0.tap(self.scrX * 420/720, self.scrY * 940/1280)
+            self.adb0.tap(self.scrX * 300/720, self.scrY * 940/1280)
         elif rsskind == 'coin' or rsskind == 'gold':
-            self.adb0.tap(self.scrX * 530/720, self.scrY * 940/1280)
+            self.adb0.tap(self.scrX * 420/720, self.scrY * 940/1280)
         elif rsskind == 'camp' or rsskind == 'tent':
+            self.adb0.tap(self.scrX * 530/720, self.scrY * 940/1280)
+        elif rsskind == 'wonderTreasure':
             self.adb0.tap(self.scrX * 650/720, self.scrY * 940/1280)
 
         if lvl is not None:
