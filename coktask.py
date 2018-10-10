@@ -164,6 +164,19 @@ def donate(cok):
         cok.tap('400', (360, 805, 1))
 
 
+@subtask
+def collect_Alliance_Mission(cok):
+    cok.resetCam()
+    cok.tap('alliance')
+    cok.wait(0.5)
+    cok.adb0.swipe((cok.scrX * 360/720, cok.scrY * 1140/1280),
+                   (cok.scrX * 360/720, cok.scrY * 360/1280))
+    cok.wait(1)
+    cok.tap('Alliance Mission', (360, 430, 0.3))
+    cok.tap('collect all',(360, 1220, 1))
+    cok.tap('random quest',(520, 130, 0.3))
+    cok.tap('collect all',(360, 1220, 1))
+
 ###############################################################
 # end subtasks
 ###############################################################
