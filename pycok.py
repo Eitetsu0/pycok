@@ -159,7 +159,7 @@ class pycok(object):
             # TODO:
             pass
         if dragon is None:
-            self.tap('cancel dragon',(self.scrX * 585/720, self.scrY * 420/1280, 0.2))
+            self.tap('cancel dragon',(self.scrX * 600/720, self.scrY * 430/1280, 0.2))
         else:
             #TODO
             pass
