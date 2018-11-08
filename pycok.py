@@ -122,15 +122,15 @@ class pycok(object):
         """
         kind:{kind1:level1,kind2:level2...}
         acceptable kind:
-            'sawmill' ,'wood', 'farm' ,'food', 'iron' , 'mithril' , 'gold'
+            'sawmill' ,'wood', 'farm' ,'food', 'iron' , 'mithril' , 'gold', 'wonderTreasure'
         preset :
             a number in [-3,0];
             or a string in ('march','load','level','speed');
             default:None
         """
 
-        s = {'sawmill', 'wood', 'farm', 'food', 'iron', 'mithril', 'gold'}
-        for key in kind.keys():
+        s = {'sawmill', 'wood', 'farm', 'food', 'iron', 'mithril', 'gold', 'wonderTreasure'}
+        for key in set(kind.keys()):
             if key not in s:
                 kind.pop(key)
         self.find(**kind)
@@ -171,7 +171,7 @@ class pycok(object):
         """
         kind:{kind1:level1,kind2:level2...}
         acceptable kind:
-            'sawmill' , 'farm' , 'iron' , 'mithril' , 'gold' , 'monster' , 'camp'
+            'sawmill' , 'farm' , 'iron' , 'mithril' , 'gold' , 'monster' , 'camp', 'wonderTreasure'
         """
         if vip is None:
             vip = self.vip
@@ -252,7 +252,7 @@ class pycok(object):
             return
 
         if obj == 'blank':
-            return self.adb0.tap(self.scrX * 480/720, self.scrY * 56/1280)
+            return self.adb0.tap(self.scrX * 480/720, self.scrY * 1/1280)
         if obj == 'vipsearch':
             self.resetCam(worldMap=True)
             # TODO:opencv
