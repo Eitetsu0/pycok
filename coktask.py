@@ -152,15 +152,15 @@ def dailyRewards(cok, t='quest'):
 def donate(cok):
     cok.resetCam()
     cok.tap('alliance')
-    cok.wait(0.5)
+    cok.wait(2)
     cok.adb0.swipe((cok.scrX * 360/720, cok.scrY * 1140/1280),
                    (cok.scrX * 360/720, cok.scrY * 360/1280))
     cok.wait(1)
     cok.tap('Alliance Science & Donation', (360, 660, 0.3))
     cok.tap('recommend', (360, 350, 0.3))
     for _ in range(20):
-        cok.tap('10k', (530, 930, 1))
-        cok.tap('2k', (210, 930, 1))
+        cok.tap('10k', (530, 930))
+        cok.tap('2k', (210, 930))
         cok.tap('400', (360, 805, 1))
 
 
@@ -168,7 +168,7 @@ def donate(cok):
 def collect_Alliance_Mission(cok):
     cok.resetCam()
     cok.tap('alliance')
-    cok.wait(0.5)
+    cok.wait(2)
     cok.adb0.swipe((cok.scrX * 360/720, cok.scrY * 1140/1280),
                    (cok.scrX * 360/720, cok.scrY * 360/1280))
     cok.wait(1)
@@ -176,6 +176,71 @@ def collect_Alliance_Mission(cok):
     cok.tap('collect all',(360, 1220, 1))
     cok.tap('random quest',(520, 130, 0.3))
     cok.tap('collect all',(360, 1220, 1))
+
+
+@subtask
+def alliance_Help(cok):
+    cok.resetCam()
+    cok.tap('alliance')
+    cok.wait(1)
+    cok.adb0.swipe((cok.scrX * 360/720, cok.scrY * 1140/1280),
+                   (cok.scrX * 360/720, cok.scrY * 360/1280))
+    cok.wait(1)
+    cok.tap('Alliance Help', (360, 835, 0.5))
+    cok.tap('collect all',(360, 1230, 0.3))
+
+
+@subtask
+def civilization_Wonder(cok, **kw):
+    cok.resetCam()
+    cok.tap('alliance')
+    cok.wait(2)
+    cok.tap('civilization_Wonder', (360, 545, 0.3))
+    for key in kw:
+        if key=='donate':
+            pass
+            break
+        if key=='sacrifice':
+            cok.tap('sacrifice', (270,140,0.3))
+            for _ in range(kw[key][0]):
+                cok.tap('sacrifice',(174,985,0.5))
+            for _ in range(kw[key][1]):
+                cok.tap('soul sacrifice', (550,985,0.5))
+            break
+        if key=='skill':
+            pass
+            break
+
+
+@subtask
+def tree_of_Life(cok):
+    cok.resetCam()
+    cok.tap('alliance')
+    cok.wait(2)
+    cok.tap('tree_of_Life', (360,720,1.5))
+    cok.tap('free pick',(200,1230,1))
+    cok.tap('Advanced pick',(540,1230,1))
+
+    cok.tap('feed back',(540,130,0.3))
+    cok.tap('basic',(200,1230,1))
+    cok.tap('Advanced',(540,1230,1))
+
+
+@subtask
+def svipStore(cok,n=2):
+    cok.resetCam()
+    cok.tap('vip label',(170,81,0.5))
+    cok.tap('chest',(80,730,0.5))
+    cok.tap('open',(360,1230,3))
+    cok.resetCam()
+    cok.tap('vip label',(170,81,0.5))
+    cok.tap('enter',(583,610,0.5))
+    cok.tap('merchandise',(540,450,0.2))
+    for c in range(n):
+        cok.tap('1',(580,655+125*c,0.5))
+        cok.tap('max of slide bar',(406,753,0.3))
+        cok.tap('confirm buy',(360,845,1))
+        cok.tap('confirm buy2',(360,780,1))
 
 ###############################################################
 # end subtasks
@@ -201,7 +266,7 @@ if __name__ == '__main__':
 
     devices = []
     if args.device is None:
-        d = pycok.pycok(mode='list').adb0.listdevice()
+        d = pycok.pycok(mode='list',adbpath=pycok.ADBPATH).adb0.listdevice()
         if len(d) == 0:
             print('no device connected')
             exit(1)
