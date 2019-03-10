@@ -1,91 +1,312 @@
 [
     {
-        "name":"Angle",
-        "username":"asdfn@xxx.com",
-        "passw":"password",
-        "package":"gp",
+        "name":"Tenshi",
+        "username":null,
+        "passw":null,
+        "package":null,
         "tasklist":[
             {
-                "after": null,
-                "enable": true,
+                "name": "sheild",
+                "enable": false,
                 "fastrun": false,
                 "interval": 0,
-                "name": "sheild",
                 "nloop": 1,
                 "prepare":null,
+                "after": null,
                 "run": [
                     "sheild",
                     {
+                        "miss":100
                     }
                 ],
                 "every": 28800,
-                "start": 1529804890,
+                "start": 1530923140,
                 "time": 0,
-                "until": 1529806090
+                "until": -1
             },
             {
-                "after": null,
+                "name": "dailyBuy",
                 "enable": true,
                 "fastrun": false,
-                "interval": 4704,
+                "interval": 0,
+                "nloop": 1,
+                "prepare":[
+                    "civilization_Wonder",{}
+                ],
+                "run": [
+                    "svipStore",
+                    {
+                        "n": 2
+                    }
+                ],
+                "after": null,
+                "every": 86400,
+                "start": 1800,
+                "time": 0,
+                "until": 3600
+            },
+            {
+                "name": "signInReward",
+                "enable": true,
+                "fastrun": false,
+                "interval": 0,
+                "nloop": 1,
+                "prepare":null,
+                "after": null,
+                "run": [
+                    "dailyRewards",
+                    {
+                        "t":"signin"
+                    }
+                ],
+                "every": 86400,
+                "start": 0,
+                "time": 0,
+                "until": -1
+            },
+            {
+                "name": "DsilyQuestReward",
+                "enable": true,
+                "fastrun": false,
+                "interval": 40000,
+                "nloop": 2,
+                "prepare":null,
+                "after": null,
+                "run": [
+                    "dailyRewards",
+                    {
+                        "t":"signin&quest"
+                    }
+                ],
+                "every": 86400,
+                "start": 43200,
+                "time": 0,
+                "until": -1
+            },
+            {
+                "name": "Collect Allince Mission",
+                "enable": true,
+                "fastrun": false,
+                "interval": 14400,
+                "nloop": 6,
+                "prepare":null,
+                "after": null,
+                "run": [
+                    "collect_Alliance_Mission",
+                    {
+                    }
+                ],
+                "every": 86400,
+                "start": -1800,
+                "time": 0,
+                "until": 0
+            },
+            {
+                "name": "Tree of Life",
+                "enable": true,
+                "fastrun": false,
+                "interval": 3700,
+                "nloop": 7,
+                "prepare":null,
+                "after": null,
+                "run": [
+                    "tree_of_Life",
+                    {
+                    }
+                ],
+                "every": 86400,
+                "start": -1800,
+                "time": 0,
+                "until": 0
+            },
+            {
                 "name": "hunt",
+                "enable": true,
+                "fastrun": false,
+                "interval": 0,
                 "nloop": 1,
                 "prepare": [
                     "monsterkill",
                     {
                         "lvl":30,
-                        "times":4,
+                        "times":6,
                         "lines":3,
-                        "wait":60
+                        "wait":60,
+                        "preset":-2
                     }
                 ],
                 "run":null,
-                "every": 1800,
-                "start": 0,
+                "after": [
+                    "alliance_Help",
+                    {}
+                ],
+                "every": 3600,
+                "start": 1534809600,
                 "time": 0,
-                "until": 200
+                "until": 1534811400
             },
             {
-                "after": null,
+                "name": "gather Wonder Treasure",
                 "enable": true,
                 "fastrun": false,
-                "interval": 4900,
-                "name": "gather",
+                "interval": 3600,
                 "nloop": 1,
                 "prepare":null,
                 "run": [
                     "quickgather",
                     {
-                        "lines":2,
-                        "stype":"mithril",
-                        "level":6,
+                        "lines":1,
+                        "stype":"wonderTreasure",
+                        "level":null,
                         "preset":"speed"
                     }
                 ],
-                "every": 6000,
-                "start": 1528934400,
+                "after": null,
+                "every": 86400,
+                "start": 0,
                 "time": 0,
-                "until": 1528934900
+                "until": 82000
             },
             {
-                "after": [
-                    "monsterkill",
-                    {
-                        "lvl":30,
-                        "times":6,
-                        "lines":4
-                    }
-                ],
+                "name": "gather Daily Iron",
                 "enable": true,
                 "fastrun": false,
-                "interval": 1000,
-                "name": "monsterDay",
+                "interval": 1200,
+                "nloop": 2,
+                "prepare":null,
+                "run": [
+                    "quickgather",
+                    {
+                        "lines":1,
+                        "stype":"iron",
+                        "level":4,
+                        "preset":0
+                    }
+                ],
+                "after": null,
+                "every": 86400,
+                "start": 3600,
+                "time": 0,
+                "until": 82000
+            },
+            {
+                "name": "gather Daily Wood",
+                "enable": true,
+                "fastrun": false,
+                "interval": 1200,
+                "nloop": 1,
+                "prepare":null,
+                "run": [
+                    "quickgather",
+                    {
+                        "lines":1,
+                        "stype":"wood",
+                        "level":4,
+                        "preset":0
+                    }
+                ],
+                "after": null,
+                "every": 86400,
+                "start": 6000,
+                "time": 0,
+                "until": 82000
+            },
+            {
+                "name": "gather Daily Food",
+                "enable": true,
+                "fastrun": false,
+                "interval": 1200,
+                "nloop": 1,
+                "prepare":null,
+                "run": [
+                    "quickgather",
+                    {
+                        "lines":1,
+                        "stype":"food",
+                        "level":4,
+                        "preset":0
+                    }
+                ],
+                "after": null,
+                "every": 86400,
+                "start": 6600,
+                "time": 0,
+                "until": 82000
+            },
+            {
+                "name": "gather",
+                "enable": true,
+                "fastrun": false,
+                "interval": 3600,
+                "nloop": 1,
+                "prepare":null,
+                "run": [
+                    "quickgather",
+                    {
+                        "lines":3,
+                        "stype":"mithril",
+                        "level":6,
+                        "preset":null
+                    }
+                ],
+                "after": null,
+                "every": 3600,
+                "start": 1534809600,
+                "time": 0,
+                "until": 1534810800
+            },
+            {
+                "name": "Send Resource to Akuma",
+                "enable": false,
+                "fastrun": false,
+                "interval": 600,
+                "nloop": 10,
+                "prepare":null,
+                "run": [
+                    "sendRss2",
+                    {
+                        "loc":[744,744],
+                        "n":10,
+                        "interval":15
+                    }
+                ],
+                "after": null,
+                "every": 86400,
+                "start": 1530925200,
+                "time": 0,
+                "until": -1
+            },
+            {
+                "name": "Donate",
+                "enable": true,
+                "fastrun": false,
+                "interval": 0,
+                "nloop": 1,
+                "prepare":null,
+                "after": null,
+                "run": [
+                    "donate",
+                    {
+                    }
+                ],
+                "every": 15150,
+                "start": 420,
+                "time": 0,
+                "until": 1140
+            },
+            {
+                "name": "DayOfMonsters",
+                "enable": true,
+                "fastrun": false,
+                "interval": 1200,
                 "nloop": -1,
                 "prepare": [
                     "monsterkill",
                     {
-                        "times":9,
-                        "lines":4
+                        "lvl":30,
+                        "times":3,
+                        "lines":4,
+                        "preset":-2
                     }
                 ],
                 "run": [
@@ -93,26 +314,129 @@
                     {
                     }
                 ],
+                "after": [
+                    "monsterkill",
+                    {
+                        "times":6,
+                        "lines":4,
+                        "quick":true,
+                        "preset":-2
+                    }
+                ],
                 "every": 1209600,
                 "start": 1528848000,
                 "time": 0,
                 "until": 1528934400
+            },
+            {
+                "name": "DayOfGathering",
+                "enable": true,
+                "fastrun": false,
+                "interval": 2000,
+                "nloop": -1,
+                "prepare": [
+                    "monsterkill",
+                    {
+                        "lvl":30,
+                        "times":8,
+                        "lines":5,
+                        "preset":-2
+                    }
+                ],
+                "run": [
+                    "quickgather",
+                    {
+                        "lines":6,
+                        "stype":"iron",
+                        "level":4,
+                        "preset":"speed"
+                    }
+                ],
+                "after": null,
+                "every": 1209600,
+                "start": 1531089000,
+                "time": 0,
+                "until": 1531180800
             }
         ]
     },
     {
         "name":"demon",
+        "enable":false,
         "username":"demon@xxx.com",
         "passw":"password",
         "tasklist":[
             {
-                "after": null,
+                "name": "Donate",
                 "enable": true,
-                "fastrun": true,
+                "fastrun": false,
+                "interval": 0,
+                "nloop": 1,
+                "prepare":null,
+                "after": null,
+                "run": [
+                    "donate",
+                    {
+                    }
+                ],
+                "every": 15150,
+                "start": 420,
+                "time": 0,
+                "until": 1140
+            },
+            {
+                "name": "signInReward",
+                "enable": true,
+                "fastrun": false,
+                "interval": 0,
+                "nloop": 1,
+                "prepare":null,
+                "after": null,
+                "run": [
+                    "dailyRewards",
+                    {
+                        "t":"signin"
+                    }
+                ],
+                "every": 86400,
+                "start": 0,
+                "time": 0,
+                "until": -1
+            },
+            {
+                "name": "DsilyQuestReward",
+                "enable": true,
+                "fastrun": false,
+                "interval": 40000,
+                "nloop": 2,
+                "prepare":null,
+                "after": null,
+                "run": [
+                    "dailyRewards",
+                    {
+                        "t":"signin&quest"
+                    }
+                ],
+                "every": 86400,
+                "start": 43200,
+                "time": 0,
+                "until": -1
+            },
+            {
+                "name": "hunt&gather",
+                "enable": true,
+                "fastrun": false,
                 "interval": 16000,
-                "name": "hunt",
-                "nloop": -1,
-                "prepare": [
+                "nloop": 1,
+                "prepare":[
+                    "quickgather",
+                    {
+                        "lines":2,
+                        "stype":"mithril",
+                        "level":6
+                    }
+                ],
+                "run":[
                     "monsterkill",
                     {
                         "lvl":5,
@@ -120,15 +444,22 @@
                         "lines":3
                     }
                 ],
-                "run":null,
-                "every": 0,
+                "after": [
+                    "quickgather",
+                    {
+                        "lines":4,
+                        "stype":"mithril",
+                        "level":7
+                    }
+                ],
+                "every": 10400,
                 "start": 0,
                 "time": 0,
-                "until": -1
+                "until": 300
             },
             {
                 "after": null,
-                "enable": true,
+                "enable": false,
                 "fastrun": true,
                 "interval": 14800,
                 "name": "gather",
@@ -145,7 +476,7 @@
                 "every": 16000,
                 "start": 300,
                 "time": 0,
-                "until": -1
+                "until": 600
             }
         ]
     }
