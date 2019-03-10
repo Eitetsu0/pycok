@@ -11,7 +11,7 @@ class AdbError(subprocess.CalledProcessError):
 
 
 class adb(object):
-    adbpath=''
+    __adbpath=''
 
     def __init__(self, adbpath='default', device=None, cache='/tmp/pycok.cache'):
         if adbpath == 'default':
