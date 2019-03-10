@@ -92,6 +92,7 @@ class pycok(object):
         # return 'running'#TODO:
 
     def launchgame(self, p=None, update=False):
+        'update: only detect package name rather than launch'
         packages = self.adb0.listPackage('cok')
         if isinstance(p, int):
             self.__gamepackage = packages[p]
@@ -99,7 +100,7 @@ class pycok(object):
             i = 0
             while i <= len(packages):
                 if i == len(packages):
-                    raise CokException('no package name contains %s' % p)
+                    raise CokException('invalid package name : %s' % p)
                 if p in packages[i]:
                     self.__gamepackage = packages[i]
                     break
@@ -195,6 +196,9 @@ class pycok(object):
         self.tap('vipsearch')
         self.wait(0.5)
         if rsskind == 'monster':
+            #swipe right to make sure the first button is monster
+            self.adb0.swipe((self.scrX * 190/720, self.scrY * 940/1280),
+                            (self.scrX * 600/720, self.scrY * 940/1280))
             self.adb0.tap(self.scrX * 100/720, self.scrY * 940/1280)
             # if unique is not None:
             #     # TODO:opencv
@@ -214,6 +218,9 @@ class pycok(object):
             self.wait(0.5)
             self.tap('vipsearch')
             self.wait(0.5)
+            #swipe right to make sure the first button is monster
+            self.adb0.swipe((self.scrX * 190/720, self.scrY * 940/1280),
+                            (self.scrX * 600/720, self.scrY * 940/1280))
             self.adb0.tap(self.scrX * 190/720, self.scrY * 940/1280)
         elif rsskind is not None:
             # swipe so other icons shell be in their position
@@ -555,7 +562,7 @@ class Acc(dict):
             return soon
         print('Running TaskList of', self.name)
         startstamp = time.time()
-        if (login or cok.acc != self.name) and self.username is not None and self.passw is not None:
+        if (login or cok.acc != self.name) and self.username and self.passw:
             print('login..')
             cok.wait(10)
             cok.changeAcc(self.username, self.passw, self.package)
