@@ -4,7 +4,7 @@
 import math
 import time
 
-from .pycok import subtask
+from .Cok import subtask
 
 
 ##########################################

@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import time
-import pycok
+from . import Cok as pycok
 
 if __name__ == '__main__':
 
