@@ -768,7 +768,7 @@ class schedule():
         self.cok.speed = COKSPEED
 
         self.emu = emu
-        self.forceStop = False
+        self.forceStop = False  # if do clean job
 
         self.acclist = []
         if configFile and path.exists(configFile):
