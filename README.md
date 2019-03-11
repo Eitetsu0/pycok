@@ -1,7 +1,5 @@
 # pycok
 
-[![Gitter][gitter-picture]][gitter] ![py35][py35] [English version][english-version]
-
 This project is for learning purpose only.
 
 ## Usage
