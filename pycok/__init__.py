@@ -10,7 +10,7 @@ __author__ = 'Eitetsu'
 # from .Cok import *
 
 from .consts import *
-from .Cok import subtask, pycok, schedule
+from .Cok import subtask, pycok, schedule, subp
 from . import subtasks
 
 import argparse
