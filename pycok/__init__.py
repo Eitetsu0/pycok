@@ -5,7 +5,7 @@ __title__='pycok'
 __version__='0.9'
 __author__='Eitetsu'
 
-__all__=[]
+# __all__=[]
 
 from .Cok import *
 from . import subtasks

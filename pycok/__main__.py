@@ -2,7 +2,14 @@
 # -*- coding:utf-8 -*-
 
 import time
-from . import Cok as pycok
+import os
+import sys
+
+if not __package__:
+    path = os.path.join(os.path.dirname(__file__), os.pardir)
+    sys.path.insert(0, path)
+
+import pycok
 
 if __name__ == '__main__':
 
@@ -23,7 +30,7 @@ if __name__ == '__main__':
 
     devices = []
     if args.device is None:
-        d = pycok.pycok(mode='list',adbpath=pycok.ADBPATH).adb0.listdevice()
+        d = pycok.pycok(mode='list', adbpath=pycok.ADBPATH).adb0.listdevice()
         if len(d) == 0:
             print('no device connected')
             exit(1)
@@ -42,7 +49,8 @@ if __name__ == '__main__':
         print('now:', time.strftime(pycok.TIMEFORMAT),
               ' ; ', 'sleep', args.sleep, 'seconds')
         time.sleep(args.sleep)
-    s = pycok.schedule(configFile='./config.json', device=devices, emu=args.emu)
+    s = pycok.schedule(configFile='./config.json',
+                       device=devices, emu=args.emu)
     s.forceStop = True
 
     n = 0
