@@ -7,7 +7,7 @@ import time
 import multiprocessing
 from os import path
 
-from pyadb import adb
+from .pyadb import adb
 
 
 class CokException(Exception):
