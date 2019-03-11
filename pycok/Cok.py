@@ -1,7 +1,6 @@
 #! /usr/bin/python3
 # -*- coding:utf-8 -*-
 
-import argparse
 import json
 import time
 import multiprocessing
@@ -480,25 +479,6 @@ if __name__ == '__main__':
 
 
 ###################### schedul section ####
-parser = argparse.ArgumentParser(prog='coktask', description='Run cok tasks')
-parser.add_argument('-v', '--version', action='version',
-                    version='%(prog)s 0.8')
-parser.add_argument('-s', '--server', action='version',
-                    version='distributed sys is under working', help='connect to a remote server')
-parser.add_argument('-f', '--task-file=', dest='file',
-                    help="""
-                    a taskfile or a config file that contains a tasklist. If the given file dosen't
-                    exist or dosen't contain a tasklist pycok will create one or rewrite it with
-                    a default module
-                    """)
-parser.add_argument('-d', '--device', action='append',
-                    nargs='+', help='add devices')
-parser.add_argument('--sleep', type=int, help='sleep seconds before run')
-parser.add_argument('--emu', action='store_true',
-                    help='indicate that the decice is an emulator')
-parser.add_argument('--speed', type=int, help='')
-parser.add_argument('--adbpath', type=str, help='set adbpath')
-
 
 _TASKLIST_default = [
     {
@@ -780,12 +760,7 @@ def subtask(funcOrName):
     subp[funcOrName.__name__] = funcOrName
 
 
-AUTOEXIT = 60
-TIMEFORMAT = "%Y-%m-%d %a %H:%M:%S"  # "%a %b %d %H:%M:%S %Y"
-INTERVAL = 10
-COKSPEED = 80
-ADBPATH='default'
-
+from .consts import *
 
 class schedule():
     def __init__(self, configFile=None, device=None, package=None, vip=True, emu=False):
